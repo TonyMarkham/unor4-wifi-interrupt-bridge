@@ -65,7 +65,7 @@ in download mode.
 > > The example sketch lives on the `feature/interrupt` branch.
 > >
 > > ```
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > git switch feature/interrupt
 > > git status
 > > ```
@@ -85,7 +85,7 @@ in download mode.
 > > ```
 > > cd ~/unor4wifi-images
 > > sha256sum -c UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
 > > - ✅ Prints `UNOR4-WIFI-S3-0.6.0-interrupt.1.bin: OK`.
@@ -903,7 +903,7 @@ in download mode.
 > > curl -sLO https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/download/v0.6.0-stock/UNOR4-WIFI-S3-0.6.0-stock.bin
 > > curl -sLO https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/download/v0.6.0-stock/SHA256SUMS
 > > sha256sum -c SHA256SUMS
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
 > > - ✅ `sha256sum` prints `UNOR4-WIFI-S3-0.6.0-stock.bin: OK`.

@@ -1,5 +1,26 @@
 # Arduino UNO R4 WiFi USB Bridge firmware
 
+> [!NOTE]
+> **This is a fork: the interrupt bridge.** It adds an opt-in **UDP push
+> mode** to Arduino's bridge firmware 0.6.0: the bridge sends each
+> received datagram to the RA4M1 by itself, so a sketch can sleep until
+> a datagram arrives instead of polling. Everything else is Arduino's
+> code, unchanged.
+>
+> - Releases: [`v0.6.0-interrupt.1`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-interrupt.1)
+>   (push mode) and [`v0.6.0-stock`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-stock)
+>   (Arduino's 0.6.0, self-built, to go back to).
+> - How to build, flash and test either one: [docs/README.md](docs/README.md).
+> - Example sketch for the RA4M1: [examples/UDPPushSleep](examples/UDPPushSleep/UDPPushSleep.ino).
+>
+> Everything below this box is Arduino's original README.
+
+> [!WARNING]
+> Do not use the `esptool` command below on this board: its offsets
+> (`0xe000`, `0x10000`) are for a different partition layout, and the
+> board will not boot. The procedures in [docs/](docs/README.md) flash
+> safely.
+
 This firmware uses [arduino-esp32](https://github.com/espressif/arduino-esp32/)
 
 ## Update submodules

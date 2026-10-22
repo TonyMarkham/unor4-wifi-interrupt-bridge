@@ -44,7 +44,7 @@ This procedure does not touch the board.
 > > branch `feature/docs` plus the push-mode change.
 > >
 > > ```
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > git switch feature/interrupt
 > > git status
 > > ```
@@ -290,7 +290,7 @@ This procedure does not touch the board.
 > > cd ~/unor4wifi-images
 > > sha256sum UNOR4-WIFI-S3-0.6.0-interrupt.1.bin > UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
 > > cat UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
 > > - ✅ `cat` prints one line: 64 letters and digits, two spaces, then
