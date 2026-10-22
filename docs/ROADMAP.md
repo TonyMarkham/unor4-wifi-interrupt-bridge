@@ -26,7 +26,7 @@ flash path work, and the image to go back to if the fork misbehaves.
 | 2 | GitHub release of the stock firmware | ✅ done 2026-10-22 |
 | 3 | Interrupt (push-mode) support in the bridge | ✅ done 2026-10-22 |
 | 4 | Companion procedures for building and flashing the fork | ✅ done 2026-10-22 |
-| 5 | GitHub release of the fork | ⚪ not started |
+| 5 | GitHub release of the fork | ✅ done 2026-10-22 |
 
 > ## Phase 1 — Stock build-and-flash procedure
 >
@@ -199,22 +199,30 @@ flash path work, and the image to go back to if the fork misbehaves.
 
 > ## Phase 5 — Fork firmware release
 >
-> **Status:** ⚪ not started · **Needs:** Phase 4 done ✅
+> **Status:** ✅ done 2026-10-22
 >
-> **Deliverable:** a **separate** GitHub release for the fork's binary.
+> **Deliverable:** a **separate** GitHub release for the fork's binary —
+> [`v0.6.0-interrupt.1`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-interrupt.1).
 >
 > **Plan**
 >
-> - Tag: `v0.6.0-interrupt.1` (proposed) — Arduino's base version plus
->   the fork's revision; see "Maintenance model".
-> - Same asset set and release-note shape as Phase 2, plus what push
->   mode adds and a link to the companion procedure.
+> - Tag: `v0.6.0-interrupt.1`, on `feature/interrupt`, at `7e5cd3d`
+>   (the commit with the procedures and `examples/UDPPushSleep`) —
+>   Arduino's base version plus the fork's revision; see "Maintenance
+>   model".
+> - Assets: `UNOR4-WIFI-S3-0.6.0-interrupt.1.bin` (the image flashed and
+>   tested in Phase 4) and `SHA256SUMS`, as decided for Phase 2.
+> - Release notes: Phase 2's shape, plus what push mode adds, how to
+>   tell the fork from stock, the example sketch, and links to both
+>   procedures. Kept in
+>   [releases/v0.6.0-interrupt.1.md](releases/v0.6.0-interrupt.1.md).
 >
 > **Done when**
 >
-> - [ ] The release text has been reviewed before publishing.
-> - [ ] The release is published, and the asset's SHA256 matches the
->       file verified in Phase 4.
+> - [x] The release text has been reviewed before publishing.
+> - [x] The release is published, and the asset's SHA256 matches the
+>       file verified in Phase 4 (`603a3b84…00cb`; the downloaded asset
+>       is byte-for-byte the flashed image).
 
 ## Maintenance model
 
