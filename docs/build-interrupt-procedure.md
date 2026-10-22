@@ -1,16 +1,20 @@
-# UNO R4 WiFi interrupt bridge 0.6.101 — build procedure
+# UNO R4 WiFi interrupt bridge 0.6.102 — build procedure
 
-This procedure builds the **interrupt fork** of the ESP32-S3 bridge
-firmware: Arduino's 0.6.0 plus UDP push mode (`AT+UDPPUSH`, `+UDPRX:`
-frames). The result is one image file, saved outside the repository,
-ready for [flash-interrupt-procedure.md](flash-interrupt-procedure.md).
-It contains only what you do and what you should see.
+This procedure builds revision 2 of the **interrupt fork** of the
+ESP32-S3 bridge firmware: Arduino's 0.6.0 plus UDP push mode
+(`AT+UDPPUSH`, `+UDPRX:` frames), with an up-to-date set of TLS root
+certificates. The result is one image file, saved outside the
+repository, ready for
+[flash-interrupt-procedure.md](flash-interrupt-procedure.md). It
+contains only what you do and what you should see.
 
 This procedure does not touch the board.
 
-**Run on 2026-10-22.** Followed as written, starting from an empty
-`~/unor4wifi-images`; the image matched an earlier build byte for byte
-(the SHA256 quoted in 2.3).
+**Revision 2 not yet followed as written.** The values below were
+measured on a build of revision 2 on 2026-10-22. Revision 1 (0.6.101)
+was followed as written the same day, starting from an empty
+`~/unor4wifi-images`, and its image matched an earlier build byte for
+byte.
 
 > [!IMPORTANT]
 > This procedure assumes you have already followed
@@ -82,17 +86,26 @@ This procedure does not touch the board.
 > > >
 > > > **Then:** repeat P.1.
 >
-> > ### P.2 Check this is the fork's source
+> > ### P.2 Check this is the fork's source, revision 2
+> >
+> > The first command checks the version and the push-mode command; the
+> > other two check the TLS root certificates: how many there are, and
+> > that the two distrusted after the eMudhra key compromise of October
+> > 2026 are gone.
 > >
 > > ```
 > > grep -E 'define (ESP_FW_VERSION|_UDPPUSH)' UNOR4USBBridge/at_handler.h UNOR4USBBridge/commands.h
+> > grep -c 'BEGIN CERTIFICATE' certificates/cacrt_all.pem
+> > grep -c -e 'emSign ECC Root CA - G3' -e 'AAA Certificate Services' certificates/cacrt_all.pem
 > > ```
 > >
-> > - ✅ Exactly two lines: one ending in `"0.6.101"`, one ending in
-> >   `"+UDPPUSH"`.
+> > - ✅ Exactly two lines ending in `"0.6.102"` and `"+UDPPUSH"`, then
+> >   `121`, then `0`.
 > > - ❌ The `ESP_FW_VERSION` line ends in `"0.6.0"`, or there is no
 > >   `_UDPPUSH` line → you are on the stock source. Repeat P.1 and
 > >   check its `On branch` line.
+> > - ❌ It ends in `"0.6.101"`, or the counts are `151` and `2` → your
+> >   copy is revision 1. Run `git pull`, then repeat P.2.
 >
 > > ### P.3 Check the submodules
 > >
@@ -185,8 +198,8 @@ This procedure does not touch the board.
 > > ```
 > >
 > > - ✅ A number **no larger than `1638400`**. It is about `1181000`
-> >   (`1180624` when this procedure was tested — about 800 bytes more
-> >   than the stock firmware).
+> >   (`1180624` on 2026-10-22 — about 800 bytes more than the stock
+> >   firmware; the certificates are not part of this file).
 > > - ❌ Larger than `1638400` → **Fix 1.3** below. Do not continue.
 > >
 > > > #### Fix 1.3 — the firmware is larger than 1638400 bytes
@@ -200,14 +213,14 @@ This procedure does not touch the board.
 > > ### 1.4 Check the firmware is the fork
 > >
 > > ```
-> > grep -a -o -E 'UNO WiFi R4 CMSIS-DAP \(interrupt\)|0\.6\.101|\+UDPPUSH' UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.bin | sort -u
+> > grep -a -o -E 'UNO WiFi R4 CMSIS-DAP \(interrupt\)|0\.6\.102|\+UDPPUSH' UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.bin | sort -u
 > > ```
 > >
 > > - ✅ Exactly these three lines:
 > >
 > >   ```
 > >   +UDPPUSH
-> >   0.6.101
+> >   0.6.102
 > >   UNO WiFi R4 CMSIS-DAP (interrupt)
 > >   ```
 > >
@@ -228,7 +241,7 @@ This procedure does not touch the board.
 > > lines), then combines everything into one image.
 > >
 > > - ✅ Near the end you see
-> >   `gen_crt_bundle.py: Successfully added 151 certificates in total`,
+> >   `gen_crt_bundle.py: Successfully added 121 certificates in total`,
 > >   then `Combine binaries`, then `Done`.
 > > - ❌ `python: command not found`, `Traceback`, or any `Error` →
 > >   **Fix 2.1** below.
@@ -286,19 +299,19 @@ This procedure does not touch the board.
 > >
 > > ```
 > > mkdir -p ~/unor4wifi-images
-> > cp UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/S3-BOOT-APP.bin ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin
+> > cp UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/S3-BOOT-APP.bin ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.2.bin
 > > cd ~/unor4wifi-images
-> > sha256sum UNOR4-WIFI-S3-0.6.0-interrupt.1.bin > UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
-> > cat UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
+> > sha256sum UNOR4-WIFI-S3-0.6.0-interrupt.2.bin > UNOR4-WIFI-S3-0.6.0-interrupt.2.bin.sha256
+> > cat UNOR4-WIFI-S3-0.6.0-interrupt.2.bin.sha256
 > > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
 > > - ✅ `cat` prints one line: 64 letters and digits, two spaces, then
-> >   `UNOR4-WIFI-S3-0.6.0-interrupt.1.bin`. When this procedure was
-> >   tested it was
-> >   `603a3b8477ba41a628190cb2ff9e8d1089eef67bbde7d607a0bb8309dcbf00cb`;
-> >   a different value is normal if your repository is in a different
-> >   folder, because build paths are compiled into the firmware.
+> >   `UNOR4-WIFI-S3-0.6.0-interrupt.2.bin`. On 2026-10-22, in
+> >   `~/git/unor4-wifi-interrupt-bridge` of the user `tony`, it was
+> >   `0f20d1ad49891c24cd6f60095c8c8e66f6df4e7207edf9153cbb2712d7532412`;
+> >   a different value is normal for a different user or folder,
+> >   because the folder's full path is compiled into the firmware.
 > > - ❌ `cp` says `No such file or directory` → 2.2 did not pass.
 > >   Repeat from 2.1.
 > >
@@ -308,6 +321,6 @@ This procedure does not touch the board.
 > ## Done
 >
 > The fork's image is saved as
-> `~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin`, with its
+> `~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.2.bin`, with its
 > checksum next to it. To put it on the board, follow
 > [flash-interrupt-procedure.md](flash-interrupt-procedure.md).

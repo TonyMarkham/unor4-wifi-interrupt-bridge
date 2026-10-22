@@ -1,10 +1,12 @@
-# UNO R4 WiFi interrupt bridge 0.6.101 — flash and test procedure
+# UNO R4 WiFi interrupt bridge 0.6.102 — flash and test procedure
 
-This procedure flashes the **interrupt fork** of the bridge firmware to
-an Arduino UNO R4 WiFi, then proves push mode works with the example
-sketch in `examples/UDPPushSleep`: the board's RA4M1 sleeps until a UDP
-datagram sent from the PC arrives, without ever asking for it. It
-contains only what you do and what you should see.
+This procedure flashes revision 2 of the **interrupt fork** of the
+bridge firmware to an Arduino UNO R4 WiFi, then tests it on the board:
+push mode with the example sketch in `examples/UDPPushSleep` (the
+board's RA4M1 sleeps until a UDP datagram sent from the PC arrives,
+without ever asking for it), and the bridge's TLS root certificates
+with `examples/TLSCheck`. It contains only what you do and what you
+should see.
 
 > [!IMPORTANT]
 > This procedure assumes two things:
@@ -16,7 +18,7 @@ contains only what you do and what you should see.
 >    not repeat their setup.
 > 2. You have followed
 >    [build-interrupt-procedure.md](build-interrupt-procedure.md), so
->    the image `~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin`
+>    the image `~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.2.bin`
 >    exists.
 >
 > Step P below checks both.
@@ -25,14 +27,13 @@ contains only what you do and what you should see.
 > Step 4 writes to the board. Do not start step 1 until step P has
 > passed every ✅ check.
 
-**Run on a board on 2026-10-22.** This procedure was followed end to
-end on a UNO R4 WiFi running the stock firmware, with the image that
-build-interrupt-procedure.md produced (the same file, byte for byte,
-in two separate builds). Step 3 was skipped, as 3.1 allows. The ✅
-lines in 2.3, 4.2.2, 5.2, 5.4 and 5.5 quote what was seen. The port
-capture in 2.3 was added after that run and checked on the board
-separately: it found the port in download mode, and the chip check in
-3.2 ran through it.
+**Revision 2 not yet run on a board.** Steps 1–5 were followed end to
+end on a UNO R4 WiFi on 2026-10-22 with revision 1 (0.6.101); the ✅
+lines in 2.3, 4.2.2, 5.2, 5.4 and 5.5 quote what was seen then, with
+the version updated to 0.6.102. Step 6 (the TLS check) is new in
+revision 2; its ✅ is worked out from the sketch's source and the
+servers' certificate chains. If anything differs, **stop** — the doc
+is what needs fixing.
 
 ## How to use this procedure
 
@@ -88,11 +89,11 @@ separately: it found the port in download mode, and the chip check in
 > >
 > > ```
 > > cd ~/unor4wifi-images
-> > sha256sum -c UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
+> > sha256sum -c UNOR4-WIFI-S3-0.6.0-interrupt.2.bin.sha256
 > > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
-> > - ✅ Prints `UNOR4-WIFI-S3-0.6.0-interrupt.1.bin: OK`.
+> > - ✅ Prints `UNOR4-WIFI-S3-0.6.0-interrupt.2.bin: OK`.
 > > - ❌ `cd` or `sha256sum` says `No such file or directory` → the
 > >   image was never built. Follow build-interrupt-procedure.md.
 > >   **Then:** repeat P.2.
@@ -105,7 +106,7 @@ separately: it found the port in download mode, and the chip check in
 > > > with build-interrupt-procedure.md (steps 2.1 to 2.3 are enough):
 > > >
 > > > ```
-> > > rm ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin.sha256
+> > > rm ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.2.bin ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.2.bin.sha256
 > > > ```
 > > >
 > > > **Then:** repeat P.2.
@@ -169,12 +170,13 @@ separately: it found the port in download mode, and the chip check in
 > > - ❌ Prints nothing → `sudo apt install netcat-openbsd`, then repeat
 > >   P.5.
 >
-> > ### P.6 Put your WiFi details into the example sketch
+> > ### P.6 Put your WiFi details into the example sketches
 > >
-> > Step 5 tests the fork with the example sketch in
-> > `examples/UDPPushSleep`, which joins your WiFi network. Its
-> > credentials go in a file that git ignores, so they can never be
-> > committed.
+> > Steps 5 and 6 test the fork with two sketches, `examples/UDPPushSleep`
+> > and `examples/TLSCheck`, which both join your WiFi network. Each
+> > keeps the credentials in its own file that git ignores, so they can
+> > never be committed. You fill in the first one and copy it to the
+> > second.
 > >
 > > > [!IMPORTANT]
 > > > The board's WiFi only works on **2.4 GHz** networks. If your
@@ -191,32 +193,45 @@ separately: it found the port in download mode, and the chip check in
 > > > `your-network-password` with your network's name and password.
 > > > Keep the double quotes around them. Save with **Ctrl+O**, then
 > > > **Enter**, and leave with **Ctrl+X**.
-> >
-> > > #### P.6.2 Check the file
+> > >
+> > > Then copy the finished file to the second sketch:
 > > >
 > > > ```
-> > > grep -c your-network examples/UDPPushSleep/arduino_secrets.h
+> > > cp examples/UDPPushSleep/arduino_secrets.h examples/TLSCheck/arduino_secrets.h
+> > > ```
+> >
+> > > #### P.6.2 Check the files
+> > >
+> > > ```
+> > > grep -c your-network examples/UDPPushSleep/arduino_secrets.h examples/TLSCheck/arduino_secrets.h
 > > > git status --short examples/
 > > > ```
 > > >
-> > > - ✅ `grep` prints `0`, and `git status` prints nothing.
-> > > - ❌ `grep` prints `1` or `2` → a placeholder is still there.
-> > >   Repeat P.6.1's `nano` line.
+> > > - ✅ `grep` prints two lines, each ending in `:0`, and
+> > >   `git status` prints nothing.
+> > > - ❌ A line ends in `:1` or `:2` → a placeholder is still there.
+> > >   Repeat P.6.1 from its `nano` line.
+> > > - ❌ `grep` says `No such file or directory` for
+> > >   `examples/TLSCheck/arduino_secrets.h` → the copy was not made.
+> > >   Run P.6.1's `cp … examples/TLSCheck/arduino_secrets.h` line.
 > > > - ❌ `git status` prints a line with `arduino_secrets.h` → **stop**:
 > > >   git would commit your password. The `.gitignore` on this branch
 > > >   should prevent it; check P.1 says `On branch feature/interrupt`.
 >
-> > ### P.7 Build the example sketch
+> > ### P.7 Build the example sketches
 > >
-> > Building it now, before the board is involved, catches problems
+> > Building them now, before the board is involved, catches problems
 > > early.
 > >
 > > ```
 > > arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi examples/UDPPushSleep
+> > arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi examples/TLSCheck
 > > ```
 > >
-> > - ✅ Ends with `Sketch uses … bytes` and `Global variables use …`
-> >   lines and no `Error` (`Sketch uses 61824 bytes` on 2026-10-22).
+> > - ✅ Each one ends with `Sketch uses … bytes` and
+> >   `Global variables use …` lines and no `Error`
+> >   (`Sketch uses 61824 bytes` and `Sketch uses 64056 bytes` on
+> >   2026-10-22).
 > > - ❌ `arduino_secrets.h: No such file or directory` → P.6.1 was not
 > >   done. **Then:** do P.6, then repeat P.7.
 > > - ❌ Any other error → **stop** and look up the first `error:` line.
@@ -489,14 +504,21 @@ separately: it found the port in download mode, and the chip check in
 >
 > > ### 3.1 Decide whether you need a new backup
 > >
-> > Step 4 overwrites only the first 1966080 bytes of the chip. On a
-> > board running the stock firmware from build-original-procedure.md,
-> > those bytes are exactly the `v0.6.0-stock` release image, which
-> > **Going back to stock** (S.1) at the end of this document puts
-> > back. Everything else on the chip, your saved settings included, is
-> > never touched. So in that one case a new backup adds nothing.
+> > Step 4 overwrites only the first 1966080 bytes of the chip.
+> > Everything else on the chip, your saved settings included, is never
+> > touched. Those first bytes are always firmware this repository
+> > publishes, if the board runs either:
 > >
-> > Check that the stock procedure's backup is still there:
+> > - the stock firmware from build-original-procedure.md: they are
+> >   exactly the `v0.6.0-stock` release image, which **Going back to
+> >   stock** (S.1) at the end of this document puts back; or
+> > - an earlier revision of this fork (for example 0.6.101): its
+> >   release image (`v0.6.0-interrupt.1`) puts back the same firmware —
+> >   byte for byte if you built it in `~/git/unor4-wifi-interrupt-bridge`
+> >   as user `tony`, otherwise identical in behavior.
+> >
+> > In those cases a new backup adds nothing. Check that the stock
+> > procedure's backup is still there too:
 > >
 > > ```
 > > ls -l ~/unor4wifi-backups/
@@ -504,8 +526,9 @@ separately: it found the port in download mode, and the chip check in
 > >
 > > - ✅ **Both** of these are true → you may skip the rest of step 3;
 > >   go to **4.1** without unplugging the board:
-> >   - 1.2 showed `UNO WiFi R4 CMSIS-DAP` **without** `(interrupt)`,
-> >     and `bcdDevice 0.06`;
+> >   - 1.2 showed `bcdDevice 0.06` and an `iProduct` of
+> >     `UNO WiFi R4 CMSIS-DAP` (stock) or
+> >     `UNO WiFi R4 CMSIS-DAP (interrupt)` (an earlier fork revision);
 > >   - `ls` lists at least one `esp32s3-….bin` file of size exactly
 > >     `8388608`.
 > > - ❌ Either is not true, or you skipped 1.2, or you are not sure →
@@ -625,7 +648,7 @@ separately: it found the port in download mode, and the chip check in
 > > **Board:** plugged in — do not touch · **Jumper:** none
 > >
 > > ```
-> > espflash write-bin -b 115200 --port "${PORT:?is not set}" 0x0 ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin
+> > espflash write-bin -b 115200 --port "${PORT:?is not set}" 0x0 ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.2.bin
 > > ```
 > >
 > > If it asks `Remember this serial port for future use? (y/n)`, press
@@ -807,7 +830,7 @@ separately: it found the port in download mode, and the chip check in
 > > > Joining WiFi <your network>
 > > > Joined. Board IP: <board-ip>
 > > > > AT+FWVERSION?
-> > > < +FWVERSION: 0.6.101
+> > > < +FWVERSION: 0.6.102
 > > > OK
 > > > > AT+UDPBEGIN=4210
 > > > < +UDPBEGIN: 0
@@ -897,19 +920,141 @@ separately: it found the port in download mode, and the chip check in
 > >
 > > In the first terminal, press **Ctrl+C**.
 
+> ## Step 6 — Check the TLS root certificates
+>
+> **Board:** plugged in · **Jumper:** none · **Run from:** repository root
+>
+> When a sketch opens a TLS connection (`WiFiSSLClient`) without its
+> own CA certificate, the bridge checks the server against the root
+> certificates built into its firmware. Revision 2 updated them after
+> the eMudhra CA key compromise of October 2026. The `examples/TLSCheck`
+> sketch connects to well-known sites that use different roots, and to
+> one site whose root nobody trusts, which must be refused.
+>
+> > [!CAUTION]
+> > This replaces the sketch on the RA4M1 (the push-mode example from
+> > step 5).
+>
+> > ### 6.1 Put the board into bootloader mode
+> >
+> > Double-tap the board's RESET button (two quick presses).
+> >
+> > - ✅ The onboard LED fades in and out — the board is waiting for an
+> >   upload. Do 6.2 and 6.3 straight away.
+> > - ❌ The LED does not fade → the taps were too slow; try again,
+> >   faster.
+>
+> > ### 6.2 Capture the board's port
+> >
+> > Run both lines; the first finds the port and stores it in `PORT`,
+> > the second shows it:
+> >
+> > ```
+> > PORT=$(readlink -f $(find /dev/serial/by-id/ -iname '*UNO_WiFi_R4_CMSIS-DAP*' 2>/dev/null) 2>/dev/null)
+> > echo "PORT is $PORT"
+> > ```
+> >
+> > - ✅ The last line is `PORT is /dev/ttyACM` followed by a number.
+> >   Do 6.3 straight away.
+> > - ❌ Just `PORT is` with nothing after it → the board's port was
+> >   not found. Run `ls -l /dev/serial/by-id/`: with the fork running
+> >   it lists one line like
+> >   `usb-Arduino_UNO_WiFi_R4_CMSIS-DAP__interrupt__…-if01 -> ../../ttyACM0`
+> >   (`…` is the board's serial number). If that line is missing, repeat
+> >   4.2.2. **Then:** repeat 6.2.
+>
+> > ### 6.3 Upload the TLS check
+> >
+> > In the same terminal window as 6.2:
+> >
+> > ```
+> > arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port "${PORT:?is not set}" examples/TLSCheck
+> > ```
+> >
+> > - ✅ It finishes without `Error`.
+> > - ❌ `bash: PORT: is not set` → this terminal window never ran 6.2.
+> >   **Then:** repeat from 6.1 in this window.
+> > - ❌ It fails → repeat from 6.1 (double-tap) once. If it fails
+> >   again, **stop**.
+>
+> > ### 6.4 Run the TLS check
+> >
+> > > #### 6.4.1 Open the serial monitor
+> > >
+> > > In the same terminal window as 6.2 and 6.3:
+> > >
+> > > ```
+> > > arduino-cli monitor -p "${PORT:?is not set}" --config 115200
+> > > ```
+> > >
+> > > ✅ It lists its port settings, then prints `Connecting to`, the
+> > > port from 6.2, and `. Press CTRL-C to exit.`, and waits.
+> >
+> > > #### 6.4.2 Restart the sketch
+> > >
+> > > Press the board's RESET button **once** (not a double-tap).
+> > > Within about a minute you see this (`<your network>` is your
+> > > network's name):
+> > >
+> > > ```
+> > > === TLS check of the bridge's certificate bundle ===
+> > > Joining WiFi <your network>
+> > > Joined. Bridge firmware: 0.6.102
+> > >
+> > >   ok   www.google.com: trusted (expected trusted)
+> > >   ok   www.cloudflare.com: trusted (expected trusted)
+> > >   ok   www.arduino.cc: trusted (expected trusted)
+> > >   ok   api2.arduino.cc: trusted (expected trusted)
+> > >   ok   github.com: trusted (expected trusted)
+> > >   ok   letsencrypt.org: trusted (expected trusted)
+> > >   ok   www.sectigo.com: trusted (expected trusted)
+> > >   ok   untrusted-root.badssl.com: refused (expected refused)
+> > >
+> > > RESULT: all as expected
+> > > ```
+> > >
+> > > - ✅ The last line is `RESULT: all as expected`.
+> > > - ❌ `Bridge firmware:` shows anything other than `0.6.102` → the
+> > >   board does not run revision 2. Repeat 4.2.2.
+> > > - ❌ A line starts with `FAIL` → **Fix 6.4.2** below.
+> > > - ❌ `not joined yet, retrying in 5 s` keeps repeating → the same
+> > >   cause as 5.4.2's Fix 5.4.2-A, but check
+> > >   `examples/TLSCheck/arduino_secrets.h`; then repeat from P.7.
+> > >
+> > > > ##### Fix 6.4.2 — a site gave the wrong result
+> > > >
+> > > > Press RESET once to run the check again; a single site can fail
+> > > > for a moment because of the network. If the same line fails
+> > > > again:
+> > > >
+> > > > - `untrusted-root.badssl.com: trusted` → the bridge accepted a
+> > > >   certificate it must refuse. **Stop**: do not use this
+> > > >   firmware for TLS, and report it.
+> > > > - Any other site `refused` → that site's certificate chain ends
+> > > >   at a root this firmware does not contain. **Stop** and report
+> > > >   the site; push mode is not affected.
+> > > >
+> > > > **Then:** if the second run shows `RESULT: all as expected`, go
+> > > > on to 6.5.
+>
+> > ### 6.5 Close the monitor
+> >
+> > Press **Ctrl+C**.
+
 > ## Done
 >
-> The board runs the interrupt bridge 0.6.101, and it has passed:
+> The board runs the interrupt bridge 0.6.102, and it has passed:
 >
 > - the USB check (4.2): the bridge starts and shows `(interrupt)`;
 > - a sketch upload through the bridge (5.3);
 > - a WiFi join and AT commands from the RA4M1, including
->   `+FWVERSION: 0.6.101` (5.4);
+>   `+FWVERSION: 0.6.102` (5.4);
 > - push mode: each datagram reached the RA4M1 unasked, and the RA4M1
->   slept until it arrived (5.5).
+>   slept until it arrived (5.5);
+> - TLS: well-known sites trusted, an untrusted root refused (6.4).
 >
-> The example sketch stays on the RA4M1 until you upload another one.
-> If you made a backup in step 3, it is the newest file in
+> The TLS check stays on the RA4M1 until you upload another sketch. If
+> you made a backup in step 3, it is the newest file in
 > `~/unor4wifi-backups/`.
 
 ## Going back to stock
