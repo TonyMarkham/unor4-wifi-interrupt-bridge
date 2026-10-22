@@ -26,6 +26,9 @@ need it to follow this procedure.
   - **Expected noise** — warnings you will see that are normal.
 - If a result matches neither the ✅ nor any ❌: **stop.** Do not
   improvise, especially in step 5.
+- If you stop after step 5 has put the board in download mode, take it
+  out of download mode as the box at the top of step 5 says — it does
+  not leave on its own.
 - `sudo` asks for your login password. Typing it shows nothing on
   screen; that is normal.
 
@@ -474,6 +477,23 @@ need it to follow this procedure.
 > > running.
 >
 > > [!IMPORTANT]
+> > **Download mode lasts until the board loses power.** 5.2 (or 5.2B)
+> > puts the board into download mode, and only unplugging it takes it
+> > out again; 5.6.1 does that at the end. If you stop before 5.6 — a ❌
+> > that says **stop**, or you decide not to flash — take it out
+> > yourself:
+> >
+> > 1. Unplug the board, wait five seconds, plug it back in.
+> > 2. Check with 5.0's command, `lsusb | grep -Ei ' (2341|303a):'`:
+> >    `2341:1002` means it runs its firmware again, unchanged;
+> >    `303a:1001` means it is still in download mode (the jumper from
+> >    5.2B is still on — remove it and repeat 1).
+> >
+> > This is safe at any point except while 5.4 or 5.5 is running. If
+> > 5.5 stopped part-way, follow Fix 5.5 instead: the firmware on the
+> > board is incomplete, and finishing the flash needs download mode.
+>
+> > [!IMPORTANT]
 > > Close the Arduino IDE before step 5 and keep it closed until 5.6.
 > > Its background serial-port scanner (`serial-discovery` 1.5.0) is a
 > > known cause of 5.5 failing part-way with `Bad data checksum` and
@@ -674,8 +694,9 @@ need it to follow this procedure.
 > > > sudo /tmp/unor4wifi-reboot/unor4wifi-reboot-linux64; echo "EXIT STATUS: $?"
 > > > ```
 > > >
-> > > - ✅ The only thing printed is `EXIT STATUS: 0`. Wait two seconds,
-> > >   then go to **5.3**.
+> > > - ✅ The only thing printed is `EXIT STATUS: 0`. The board is now in
+> > >   download mode and stays in it until it is unplugged. Wait two
+> > >   seconds, then go to **5.3**.
 > > > - ❌ Anything else → **Fix 5.2.2** below.
 > > >
 > > > > ##### Fix 5.2.2 — the reboot helper failed
