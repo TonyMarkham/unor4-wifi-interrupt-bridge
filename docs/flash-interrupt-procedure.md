@@ -29,9 +29,10 @@ contains only what you do and what you should see.
 end on a UNO R4 WiFi running the stock firmware, with the image that
 build-interrupt-procedure.md produced (the same file, byte for byte,
 in two separate builds). Step 3 was skipped, as 3.1 allows. The ✅
-lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen. The port capture
-in 2.3 was added after that run and has not yet been used with a board
-in download mode.
+lines in 2.3, 4.2.2, 5.2, 5.4 and 5.5 quote what was seen. The port
+capture in 2.3 was added after that run and checked on the board
+separately: it found the port in download mode, and the chip check in
+3.2 ran through it.
 
 ## How to use this procedure
 
@@ -420,8 +421,18 @@ in download mode.
 > > ```
 > >
 > > - ✅ `lsusb` prints exactly one line, and the last line is
-> >   `PORT is /dev/ttyACM` followed by a number (for example
-> >   `PORT is /dev/ttyACM0`). Go to 3.1.
+> >   `PORT is /dev/ttyACM` followed by a number. Go to 3.1. Measured on
+> >   2026-10-22:
+> >
+> >   ```
+> >   Bus 007 Device 023: ID 303a:1001 Espressif USB JTAG/serial debug unit
+> >   PORT is /dev/ttyACM0
+> >   ```
+> >
+> >   (The bus and device numbers differ on every computer.) `PORT`
+> >   comes from the port `ls -l /dev/serial/by-id/` lists as
+> >   `usb-Espressif_USB_JTAG_serial_debug_unit_…-if00`, where `…` is
+> >   the board's MAC address.
 > > - ❌ `lsusb` prints nothing, or the last line is just `PORT is`
 > >   with nothing after it → **Fix 2.3** below.
 > > - ❌ `PORT is` is followed by **two** ports, on two lines → another
