@@ -184,15 +184,21 @@ is what needs fixing.
 > >
 > > > #### P.6.1 Create the file
 > > >
+> > > Do this even if you ran this procedure before:
+> > > `cp --update=none` never overwrites a file you already filled
+> > > in, and the copy to `examples/TLSCheck` below may be new to you.
+> > >
 > > > ```
-> > > cp examples/UDPPushSleep/arduino_secrets.h.example examples/UDPPushSleep/arduino_secrets.h
+> > > cp --update=none examples/UDPPushSleep/arduino_secrets.h.example examples/UDPPushSleep/arduino_secrets.h
 > > > nano examples/UDPPushSleep/arduino_secrets.h
 > > > ```
 > > >
 > > > In the editor, replace `your-network-name` and
 > > > `your-network-password` with your network's name and password.
 > > > Keep the double quotes around them. Save with **Ctrl+O**, then
-> > > **Enter**, and leave with **Ctrl+X**.
+> > > **Enter**, and leave with **Ctrl+X**. If it already shows your
+> > > network's details from an earlier run, check them and just leave
+> > > with **Ctrl+X**.
 > > >
 > > > Then copy the finished file to the second sketch:
 > > >
@@ -232,8 +238,9 @@ is what needs fixing.
 > >   `Global variables use …` lines and no `Error`
 > >   (`Sketch uses 61824 bytes` and `Sketch uses 64056 bytes` on
 > >   2026-10-22).
-> > - ❌ `arduino_secrets.h: No such file or directory` → P.6.1 was not
-> >   done. **Then:** do P.6, then repeat P.7.
+> > - ❌ `arduino_secrets.h: No such file or directory` (for either
+> >   sketch) → that sketch's credentials file is missing. **Then:** do
+> >   P.6 (it keeps details you entered before), then repeat P.7.
 > > - ❌ Any other error → **stop** and look up the first `error:` line.
 
 > ## Step 1 — Connect the board
