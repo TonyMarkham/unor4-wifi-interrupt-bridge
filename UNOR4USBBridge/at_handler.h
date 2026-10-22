@@ -19,10 +19,10 @@
 // 100 + the fork revision. Keep it below 128 (WiFiS3's firmwareVersionU32()
 // reads the bytes as signed chars) and ESP_FW_VERSION within 11 characters
 // (WiFiS3's firmwareVersion() truncates there).
-#define ESP_FW_VERSION    "0.6.101"
+#define ESP_FW_VERSION    "0.6.102"
 #define FIRMWARE_MAJOR    0
 #define FIRMWARE_MINOR    6
-#define FIRMWARE_PATCH    101
+#define FIRMWARE_PATCH    102
 
 #define U8TOBCD(u) ((((u/10)%10)<<4)|(u%10))
 
