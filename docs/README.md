@@ -9,4 +9,4 @@ bottom.** Everything you need is in it.
 | [ROADMAP.md](ROADMAP.md) | The plan for this fork: phases, status, decisions. |
 | [build-original-procedure.md](build-original-procedure.md) | **Start here.** The step-by-step build and flash procedure. |
 | [build-original-reference.md](build-original-reference.md) | Optional. Only if you want to know *why* a step is the way it is. The procedure never requires it. |
-| [bridge-fork.md](bridge-fork.md) | The implementation plan for the push-mode UDP bridge fork (not built yet). Not needed for the stock firmware. |
+| [releases/](releases/) | The text of each GitHub release published from this branch. |

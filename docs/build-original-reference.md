@@ -37,9 +37,13 @@ build or flash, follow the procedure.
 > - Toolchain: `xtensa-esp32s3-elf` GCC 8.4.0 (`esp-2021r2-patch5`),
 >   downloaded by the platform's own `tools/get.py`.
 > - Module: ESP32-S3-MINI-1-N8 (8 MB flash), per Arduino's full pinout.
-> - License: the sketch and platform are GPL-2.0 / LGPL-2.1 works of
->   the Arduino and Espressif projects; keep license notices intact
->   when redistributing binaries.
+> - License: the bridge's AT server (`chAT.hpp`, `parser.cpp`,
+>   `server.cpp`) carries the AGPL-3.0-or-later header; Arduino's own
+>   bridge files carry no license header; the ESP32 Arduino core is
+>   LGPL-2.1. Keep license notices intact and publish the
+>   corresponding source when redistributing binaries (ROADMAP.md,
+>   "Licensing"). This is a reading of the license headers, not legal
+>   advice.
 
 > ## 2. How this document set was verified
 >
@@ -334,7 +338,8 @@ build or flash, follow the procedure.
 > carries a matching certificate bundle, because it does **not** write
 > the certificate bundle or SPIFFS. It is the platform's own upload
 > recipe (`platform.txt`, `tools.esptool_py.upload.pattern_args`) with
-> this board's values; run from the repository root, in download mode:
+> this board's values; run from the repository root, in download mode,
+> in the terminal window where procedure 5.3 set `PORT`:
 >
 > > [!WARNING]
 > > Do not change `--flash_mode dio` to `qio` — esptool writes this
@@ -344,7 +349,7 @@ build or flash, follow the procedure.
 > > not looking.
 >
 > ```
-> python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 4MB 0x0 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.bootloader.bin 0x8000 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.partitions.bin 0x9000 boot/boot_app0.bin 0x50000 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.bin
+> python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 4MB 0x0 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.bootloader.bin 0x8000 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.partitions.bin 0x9000 boot/boot_app0.bin 0x50000 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/UNOR4USBBridge.ino.bin
 > ```
 >
 > The offsets come from three sources that agree:

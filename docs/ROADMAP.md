@@ -6,13 +6,18 @@ nothing is published until its phase's "done when" list is all ticked.
 
 **Last updated:** 2026-10-22
 
+**Current version:** this file is kept up to date on the
+`feature/interrupt` branch
+([view it there](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/blob/feature/interrupt/docs/ROADMAP.md)).
+The copy on `feature/docs` only changes together with the stock docs,
+so it can show later phases as not started.
+
 ## The goal
 
 The UNO R4 WiFi's RA4M1 should sleep until a UDP datagram arrives, then
 act on it. The stock ESP32-S3 bridge cannot do that — it only answers
 AT commands, so the RA4M1 has to poll. This fork adds an opt-in **push
-mode** to the bridge (planned in [bridge-fork.md](bridge-fork.md)),
-while every stock behavior stays unchanged.
+mode** to the bridge, while every stock behavior stays unchanged.
 
 To get there safely, the stock firmware is built, flashed and released
 first. That release is the known-good baseline: proof the toolchain and
@@ -107,7 +112,7 @@ flash path work, and the image to go back to if the fork misbehaves.
 > **Status:** ✅ done 2026-10-22
 >
 > **Deliverable:** the bridge with push mode (`AT+UDPPUSH`, `+UDPRX:`
-> frames), as designed in [bridge-fork.md](bridge-fork.md).
+> frames).
 >
 > **Where it stands**
 >
@@ -130,9 +135,6 @@ flash path work, and the image to go back to if the fork misbehaves.
 >
 > **Plan**
 >
-> - Bring `bridge-fork.md` up to the procedure's standard and onto this
->   machine (it is currently written for Windows and PowerShell, and
->   assumes espflash 4.6.0).
 > - Implement the change on a branch.
 > - Mark the firmware as the fork **without leaving Arduino's version
 >   number**: major.minor stay equal to the Arduino release it is based
@@ -163,8 +165,7 @@ flash path work, and the image to go back to if the fork misbehaves.
 >       poll from its side — first `+UDPRX: 0,5|hello\r\n` with the test
 >       sketch, then with `examples/UDPPushSleep` (flash procedure 5.5):
 >       six datagrams, each woke the sleeping RA4M1, `0` idle wake-ups
->       in between. Arduino C++ instead of the Rust firmware of
->       `bridge-fork.md` Part 5.
+>       in between.
 
 > ## Phase 4 — Companion procedure for the fork
 >
@@ -270,7 +271,7 @@ procedure records that version.
 | Decision | Why | Decided |
 |---|---|---|
 | Two releases (stock and fork), each tagged at the commit that built its binary — not one release with a binary added later | Each binary sits next to its exact source; satisfies the license's corresponding-source expectation (below) | 2026-10-22 |
-| The stock release is labelled a self-built image of Arduino's 0.6.0, not Arduino's binary | Build paths are compiled in, so the bytes differ from Arduino's (1,180,480 vs 1,180,064 for the app) | 2026-10-22 |
+| The stock release is labelled a self-built image of Arduino's 0.6.0, not Arduino's binary | Build paths are compiled in, so the bytes differ from Arduino's (app 1,179,856 bytes in the released build vs 1,180,064 in Arduino's) | 2026-10-22 |
 | Every released binary ships with a SHA256 | Identifies exactly which file was verified | 2026-10-22 |
 | Release assets: only the flash image, named `UNOR4-WIFI-S3-<version>-<variant>.bin`, plus `SHA256SUMS` | Follows Arduino's updater name for the same image; the separate build `.bin`s are never flashed in this flow | 2026-10-22 |
 | Fork marker: patch number `100 + revision` (`0.6.101` for interrupt.1) **and** the USB product-name suffix `(interrupt)` | The patch is readable by a sketch (`AT+FWVERSION`) and over HID; the name shows in `lsusb -v` with no sketch at all. Limits: patch below 128 (WiFiS3 reads signed chars), version text within 11 characters, `CMSIS-DAP` kept in the name (OpenOCD matches it) | 2026-10-22 |
@@ -281,19 +282,21 @@ procedure records that version.
 | Flashing uses `S3-BOOT-APP.bin` with espflash 2.0.0 — Arduino's own flow | Proven path; leaves NVS (saved settings) intact | 2026-10-22 |
 | Procedures follow the format in `build-original-procedure.md` | Confirmed readable; see that file's "How to use this procedure" | 2026-10-22 |
 
-**Licensing.** Parts of the bridge (`chAT.hpp`, `parser.cpp`,
-`server.cpp`) are AGPL-3.0-or-later, and the ESP32 core is LGPL-2.1.
-Distributing a binary carries an expectation to provide its
-corresponding source, which a tag per release does. The full reading is
-in [bridge-fork.md](bridge-fork.md), "Licensing" — that is a reading of
-the license headers, not legal advice.
+**Licensing.** The bridge's AT server (`chAT.hpp`, `parser.cpp`,
+`server.cpp`, Copyright Reimu NotMoe / SudoMaker) carries the GNU Affero
+General Public License v3-or-later header, and the ESP32 core is
+LGPL-2.1. Arduino's own bridge files (`UNOR4USBBridge.ino`,
+`at_handler.*`, `cmds_*.h`) carry no license header, and the repository
+has no top-level license file. A modified bridge is a derivative of the
+AGPL code. Distributing a binary carries an expectation to provide its
+corresponding source, which a tag per release does. This is a reading
+of the license headers, not legal advice.
 
 ## Open questions
 
 | Question | Settle by | Phase |
 |---|---|---|
-| Byte-for-byte reproducible builds (strip build paths with a compiler flag) — wanted? | It is a source change, so it belongs to the fork, not the stock release | 3 |
-| Everything listed under "Open items" in `bridge-fork.md` | That file's table | 3 |
+| Byte-for-byte reproducible builds on any machine (strip build paths with a compiler flag) — wanted? Today the image is identical only when built from the same checkout folder. | It is a source change, so it belongs to the fork, not the stock release | next fork revision |
 
 ## Ground rules
 

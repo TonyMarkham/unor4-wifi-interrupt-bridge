@@ -26,6 +26,9 @@ need it to follow this procedure.
   - **Expected noise** — warnings you will see that are normal.
 - If a result matches neither the ✅ nor any ❌: **stop.** Do not
   improvise, especially in step 5.
+- If you stop after step 5 has put the board in download mode, take it
+  out of download mode as the box at the top of step 5 says — it does
+  not leave on its own.
 - `sudo` asks for your login password. Typing it shows nothing on
   screen; that is normal.
 
@@ -147,10 +150,11 @@ need it to follow this procedure.
 > > ### P.8 Go to the repository and the stock branch
 > >
 > > The stock firmware is built from the `feature/docs` branch: Arduino's
-> > code unchanged, plus these docs.
+> > code unchanged, plus these docs. This procedure keeps the repository
+> > in `~/git/unor4-wifi-interrupt-bridge` (`~` is your home folder).
 > >
 > > ```
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > git switch feature/docs
 > > git status
 > > ```
@@ -168,30 +172,21 @@ need it to follow this procedure.
 > > > Get the repository:
 > > >
 > > > ```
-> > > git clone https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge.git /home/tony/git/unor4-wifi-interrupt-bridge
+> > > git clone https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge.git ~/git/unor4-wifi-interrupt-bridge
 > > > ```
 > > >
 > > > **Then:** repeat P.8.
 > >
 > > > #### Fix P.8-B — the `feature/docs` branch does not exist
 > > >
-> > > Only the repository's maintainer should ever see this, and only
-> > > once: it means the branch has not been created yet. Create it from
-> > > `main` (Arduino's unchanged code):
+> > > Your copy of the repository is older than the branch. Fetch it:
 > > >
 > > > ```
-> > > git switch -c feature/docs main
+> > > git fetch origin
 > > > ```
 > > >
-> > > ✅ Prints `Switched to a new branch 'feature/docs'`.
-> > >
-> > > Then run P.8's `git status` again. It will also list `.gitignore`
-> > > and `docs/` under "Untracked files". That is expected until they
-> > > are committed to this branch (a ROADMAP.md Phase 1 item); P.8's ✅
-> > > only needs the `On branch feature/docs` line.
-> > >
-> > > Anyone else seeing this: the clone is out of date — run
-> > > `git fetch`, then repeat P.8.
+> > > If P.8 still fails after this, **stop**: the branch is missing on
+> > > GitHub too, and there is nothing to build.
 > > >
 > > > **Then:** repeat P.8.
 
@@ -249,7 +244,7 @@ need it to follow this procedure.
 > > ```
 > > cd hardware/esp32-patched/esp32/tools
 > > python3 ./get.py
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
 > > It prints a `Downloading …` and `Extracting …` line for each of ten
@@ -378,8 +373,10 @@ need it to follow this procedure.
 > > ```
 > >
 > > - ✅ A number **no larger than `1638400`**. For the stock firmware it
-> >   is about `1180000` (`1180480` when this procedure was tested; a
-> >   difference of a few hundred bytes is normal).
+> >   is about `1180000`: `1179856` in `~/git/unor4-wifi-interrupt-bridge`
+> >   on 2026-10-22 (the build that was flashed and released), `1180480`
+> >   in another folder. The folder's path is compiled into the
+> >   firmware, so a difference of a few hundred bytes is normal.
 > > - ❌ Larger than `1638400` → **Fix 3.3** below. Do not continue.
 > >
 > > > #### Fix 3.3 — the firmware is larger than 1638400 bytes
@@ -480,6 +477,23 @@ need it to follow this procedure.
 > > running.
 >
 > > [!IMPORTANT]
+> > **Download mode lasts until the board loses power.** 5.2 (or 5.2B)
+> > puts the board into download mode, and only unplugging it takes it
+> > out again; 5.6.1 does that at the end. If you stop before 5.6 — a ❌
+> > that says **stop**, or you decide not to flash — take it out
+> > yourself:
+> >
+> > 1. Unplug the board, wait five seconds, plug it back in.
+> > 2. Check with 5.0's command, `lsusb | grep -Ei ' (2341|303a):'`:
+> >    `2341:1002` means it runs its firmware again, unchanged;
+> >    `303a:1001` means it is still in download mode (the jumper from
+> >    5.2B is still on — remove it and repeat 1).
+> >
+> > This is safe at any point except while 5.4 or 5.5 is running. If
+> > 5.5 stopped part-way, follow Fix 5.5 instead: the firmware on the
+> > board is incomplete, and finishing the flash needs download mode.
+>
+> > [!IMPORTANT]
 > > Close the Arduino IDE before step 5 and keep it closed until 5.6.
 > > Its background serial-port scanner (`serial-discovery` 1.5.0) is a
 > > known cause of 5.5 failing part-way with `Bad data checksum` and
@@ -490,9 +504,22 @@ need it to follow this procedure.
 > > pgrep -a serial-discovery
 > > ```
 >
-> All commands below use the serial port `/dev/ttyACM0`. Step 5.3
-> tells you the real one; if it differs, use yours everywhere
-> `/dev/ttyACM0` appears.
+> You never type the board's serial port yourself. Commands that talk
+> to the board use `"${PORT:?is not set}"`: the shell variable `PORT`,
+> set from the port the board actually has. 5.3 sets it in download
+> mode (and Fix 5.0-A part 4 sets it for its upload). If `PORT` is not
+> set, the command does not run at all and the terminal prints
+> `bash: PORT: is not set` — never a guess at the port.
+>
+> > [!IMPORTANT]
+> > `PORT` exists only in the terminal window where it was set. Run
+> > every command from 5.3 to the end of 5.5 in that same window. If
+> > you close it or switch to another one, repeat 5.3 there first.
+>
+> The port capture was added after this procedure's full run on the
+> board, and checked on the board separately on 2026-10-22: 5.3's
+> capture found the port in download mode, and esptool's chip check
+> (5.4.1) ran through it.
 >
 > > ### 5.0 Check who owns the USB connector
 > >
@@ -569,24 +596,35 @@ need it to follow this procedure.
 > > > > - ❌ The LED does not fade → the taps were too slow; try again,
 > > > >   faster.
 > > >
-> > > > ##### Fix 5.0-A, part 4 — Find the board's port
+> > > > ##### Fix 5.0-A, part 4 — Capture the board's port
 > > > >
-> > > > The port can change after the double-tap, so look it up now:
+> > > > The port can change after the double-tap, so capture it now.
+> > > > Run both lines; the first finds the port and stores it in
+> > > > `PORT`, the second shows it:
 > > > >
 > > > > ```
-> > > > ls -l /dev/serial/by-id/
+> > > > PORT=$(readlink -f $(find /dev/serial/by-id/ -iname '*UNO_WiFi_R4_CMSIS-DAP*' 2>/dev/null) 2>/dev/null)
+> > > > echo "PORT is $PORT"
 > > > > ```
 > > > >
-> > > > ✅ One line for the Arduino board, ending in `-> ../../ttyACM0`
-> > > > (or another number — use that in part 5).
+> > > > - ✅ The last line is `PORT is /dev/ttyACM` followed by a number
+> > > >   (for example `PORT is /dev/ttyACM0`). It finds the port that
+> > > >   `ls -l /dev/serial/by-id/` lists as
+> > > >   `usb-Arduino_UNO_WiFi_R4_CMSIS-DAP_…` (`…` is the board's serial
+> > > >   number), which is what showed up after the double-tap on
+> > > >   2026-10-22. Do part 5 straight away, in this same window.
+> > > > - ❌ Just `PORT is` with nothing after it → the board is not in
+> > > >   bootloader mode any more. Repeat from part 3.
 > > >
 > > > > ##### Fix 5.0-A, part 5 — Upload the empty sketch
 > > > >
 > > > > ```
-> > > > arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port /dev/ttyACM0 /tmp/Empty
+> > > > arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port "${PORT:?is not set}" /tmp/Empty
 > > > > ```
 > > > >
 > > > > - ✅ It finishes without `Error`.
+> > > > - ❌ `bash: PORT: is not set` → this window never ran part 4.
+> > > >   Repeat from part 3 in this window.
 > > > > - ❌ It fails → repeat from part 3 (double-tap) once. If it fails
 > > > >   again, **stop** — recovering this chip is outside this
 > > > >   procedure.
@@ -597,9 +635,9 @@ need it to follow this procedure.
 > > >
 > > > This whole fix was run on a board on 2026-10-22: after part 3's
 > > > double-tap, the port showed up as `UNO_WiFi_R4_CMSIS-DAP`, the
-> > > upload succeeded, and 5.0 then showed `2341:1002`. The double-tap
+> > > upload succeeded, and 5.0 then showed `2341:1002`. A double-tap
 > > > before uploading is the established practice for uploads to this
-> > > board in bridge-fork.md (Step 2.7).
+> > > board.
 > > > The UNO R4 board support officially lists `2341:006d` as an upload
 > > > port, so it is a path Arduino designed for.
 > > >
@@ -656,8 +694,9 @@ need it to follow this procedure.
 > > > sudo /tmp/unor4wifi-reboot/unor4wifi-reboot-linux64; echo "EXIT STATUS: $?"
 > > > ```
 > > >
-> > > - ✅ The only thing printed is `EXIT STATUS: 0`. Wait two seconds,
-> > >   then go to **5.3**.
+> > > - ✅ The only thing printed is `EXIT STATUS: 0`. The board is now in
+> > >   download mode and stays in it until it is unplugged. Wait two
+> > >   seconds, then go to **5.3**.
 > > > - ❌ Anything else → **Fix 5.2.2** below.
 > > >
 > > > > ##### Fix 5.2.2 — the reboot helper failed
@@ -720,24 +759,44 @@ need it to follow this procedure.
 > > > Remove the jumper. The board stays in download mode until it
 > > > is next unplugged. Go to **5.3**.
 >
-> > ### 5.3 Verify download mode and find the port
+> > ### 5.3 Verify download mode and capture the port
 > >
 > > **Board:** plugged in · **Jumper:** none
 > >
+> > Run all three lines. The second one finds the board's port in
+> > download mode and stores it in `PORT`; the third shows it:
+> >
 > > ```
 > > lsusb -d 303a:1001
-> > ls -l /dev/serial/by-id/ | grep -i espressif
+> > PORT=$(readlink -f $(find /dev/serial/by-id/ -iname '*espressif*' 2>/dev/null) 2>/dev/null)
+> > echo "PORT is $PORT"
 > > ```
 > >
-> > - ✅ `lsusb` prints exactly one line, and the second command prints
-> >   one line ending in `-> ../../ttyACM0` (or another `ttyACM` number —
-> >   that is your port).
-> > - ❌ `lsusb` prints nothing → **Fix 5.3** below.
+> > - ✅ `lsusb` prints exactly one line, and the last line is
+> >   `PORT is /dev/ttyACM` followed by a number. Measured on
+> >   2026-10-22:
+> >
+> >   ```
+> >   Bus 007 Device 023: ID 303a:1001 Espressif USB JTAG/serial debug unit
+> >   PORT is /dev/ttyACM0
+> >   ```
+> >
+> >   (The bus and device numbers differ on every computer.) `PORT`
+> >   comes from the port `ls -l /dev/serial/by-id/` lists as
+> >   `usb-Espressif_USB_JTAG_serial_debug_unit_…-if00`, where `…` is
+> >   the board's MAC address.
+> > - ❌ `lsusb` prints nothing, or the last line is just `PORT is`
+> >   with nothing after it → **Fix 5.3** below.
+> > - ❌ `PORT is` is followed by **two** ports, on two lines → another
+> >   ESP32 board is plugged in. Unplug it, then repeat 5.3.
 > >
 > > > #### Fix 5.3 — the board is not in download mode
 > > >
 > > > Re-run the 5.0 command (`lsusb | grep -Ei ' (2341|303a):'`):
 > > >
+> > > - `303a:1001` → the board *is* in download mode, but its serial
+> > >   port had not appeared yet when `PORT` was set. Wait five seconds
+> > >   and repeat 5.3 once. If `PORT is` is still empty, **stop**.
 > > > - `2341:006d` → go back to 5.0 and do its Fix 5.0-A.
 > > > - `2341:1002` → the board is running its firmware normally. If you
 > > >   came from 5.2, wait five seconds and repeat 5.3 once; if it still
@@ -764,19 +823,23 @@ need it to follow this procedure.
 > > > Run:
 > > >
 > > > ```
-> > > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 --after no_reset flash_id
+> > > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" --after no_reset flash_id
 > > > ```
 > > >
 > > > - ✅ Among the output: `Chip is ESP32-S3 (revision v…)`, then
 > > >   `Detected flash size: 8MB`, and finally `Staying in bootloader.`
 > > > - ❌ `Detected flash size: 4MB` → use `0x400000` instead of
 > > >   `0x800000` in 5.4.2 and `4194304` instead of `8388608` in 5.4.3.
-> > > - ❌ `Failed to connect` or any `Error` → **Fix 5.4.1** below.
+> > > - ❌ `bash: PORT: is not set`, `Failed to connect` or any `Error` →
+> > >   **Fix 5.4.1** below.
 > > >
 > > > > ##### Fix 5.4.1 — esptool could not talk to the board
 > > > >
 > > > > Nothing has been written; this only reads.
 > > > >
+> > > > - `bash: PORT: is not set` → this terminal window never ran 5.3.
+> > > >   The board is still in download mode: repeat 5.3 in this window
+> > > >   (no need to unplug), then repeat 5.4.1.
 > > > > - `Permission denied` → P.7 was not passed. Do P.5 to P.7, then
 > > > >   come back.
 > > > > - `Failed to connect` or `port is busy` → something else is
@@ -796,7 +859,7 @@ need it to follow this procedure.
 > > >
 > > > ```
 > > > mkdir -p ~/unor4wifi-backups
-> > > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 --after no_reset read_flash 0 0x800000 ~/unor4wifi-backups/esp32s3-$(date +%Y%m%d-%H%M%S).bin
+> > > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" --after no_reset read_flash 0 0x800000 ~/unor4wifi-backups/esp32s3-$(date +%Y%m%d-%H%M%S).bin
 > > > ```
 > > >
 > > > It takes about **15 minutes** (measured on 2026-10-22: started
@@ -853,7 +916,7 @@ need it to follow this procedure.
 > > **Board:** plugged in — do not touch · **Jumper:** none
 > >
 > > ```
-> > espflash write-bin -b 115200 --port /dev/ttyACM0 0x0 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/S3-BOOT-APP.bin
+> > espflash write-bin -b 115200 --port "${PORT:?is not set}" 0x0 UNOR4USBBridge/build/esp32-patched.esp32.arduino_unor4wifi_usb_bridge/S3-BOOT-APP.bin
 > > ```
 > >
 > > If it asks `Remember this serial port for future use? (y/n)`, press
@@ -878,6 +941,9 @@ need it to follow this procedure.
 > >
 > > > #### Fix 5.5 — the flash could not connect or stopped with an error
 > > >
+> > > - **`bash: PORT: is not set`** (nothing was run): this terminal
+> > >   window never ran 5.3. The board is still in download mode:
+> > >   repeat 5.3 in this window (no need to unplug), then repeat 5.5.
 > > > - **It could not connect** (nothing was written): close the
 > > >   Arduino IDE and any serial monitor, and stop ModemManager for
 > > >   this session (`sudo systemctl stop ModemManager`). Then unplug,
@@ -956,10 +1022,11 @@ need it to follow this procedure.
 >
 > > #### R.1.3 Write it back
 > >
-> > Replace `<file-name>` with the name from R.1.2:
+> > In the same terminal window as R.1.1's 5.3. Replace `<file-name>`
+> > with the name from R.1.2:
 > >
 > > ```
-> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 write_flash 0x0 ~/unor4wifi-backups/<file-name>
+> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" write_flash 0x0 ~/unor4wifi-backups/<file-name>
 > > ```
 > >
 > > ✅ It prints `Hash of data verified.` and then `Leaving...`.
