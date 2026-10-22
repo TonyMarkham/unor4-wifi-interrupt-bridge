@@ -496,10 +496,10 @@ need it to follow this procedure.
 > > every command from 5.3 to the end of 5.5 in that same window. If
 > > you close it or switch to another one, repeat 5.3 there first.
 >
-> The port capture was added after this procedure's run on the board
-> (2026-10-22). The same capture for the board running normally was
-> checked on the board; the download-mode capture in 5.3 has not yet
-> been used on hardware.
+> The port capture was added after this procedure's full run on the
+> board, and checked on the board separately on 2026-10-22: 5.3's
+> capture found the port in download mode, and esptool's chip check
+> (5.4.1) ran through it.
 >
 > > ### 5.0 Check who owns the USB connector
 > >
@@ -752,8 +752,18 @@ need it to follow this procedure.
 > > ```
 > >
 > > - ✅ `lsusb` prints exactly one line, and the last line is
-> >   `PORT is /dev/ttyACM` followed by a number (for example
-> >   `PORT is /dev/ttyACM0`).
+> >   `PORT is /dev/ttyACM` followed by a number. Measured on
+> >   2026-10-22:
+> >
+> >   ```
+> >   Bus 007 Device 023: ID 303a:1001 Espressif USB JTAG/serial debug unit
+> >   PORT is /dev/ttyACM0
+> >   ```
+> >
+> >   (The bus and device numbers differ on every computer.) `PORT`
+> >   comes from the port `ls -l /dev/serial/by-id/` lists as
+> >   `usb-Espressif_USB_JTAG_serial_debug_unit_…-if00`, where `…` is
+> >   the board's MAC address.
 > > - ❌ `lsusb` prints nothing, or the last line is just `PORT is`
 > >   with nothing after it → **Fix 5.3** below.
 > > - ❌ `PORT is` is followed by **two** ports, on two lines → another
