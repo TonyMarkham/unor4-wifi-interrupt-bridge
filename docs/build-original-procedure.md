@@ -597,9 +597,9 @@ need it to follow this procedure.
 > > >
 > > > This whole fix was run on a board on 2026-10-22: after part 3's
 > > > double-tap, the port showed up as `UNO_WiFi_R4_CMSIS-DAP`, the
-> > > upload succeeded, and 5.0 then showed `2341:1002`. The double-tap
+> > > upload succeeded, and 5.0 then showed `2341:1002`. A double-tap
 > > > before uploading is the established practice for uploads to this
-> > > board in bridge-fork.md (Step 2.7).
+> > > board.
 > > > The UNO R4 board support officially lists `2341:006d` as an upload
 > > > port, so it is a path Arduino designed for.
 > > >
