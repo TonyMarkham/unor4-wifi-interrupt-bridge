@@ -12,3 +12,6 @@
 
 # arduino-cli installer's default output folder
 /bin/
+
+# WiFi credentials for test sketches
+arduino_secrets.h
