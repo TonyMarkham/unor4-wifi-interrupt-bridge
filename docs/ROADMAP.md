@@ -6,6 +6,12 @@ nothing is published until its phase's "done when" list is all ticked.
 
 **Last updated:** 2026-10-22
 
+**Current version:** this file is kept up to date on the
+`feature/interrupt` branch
+([view it there](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/blob/feature/interrupt/docs/ROADMAP.md)).
+The copy on `feature/docs` only changes together with the stock docs,
+so it can show later phases as not started.
+
 ## The goal
 
 The UNO R4 WiFi's RA4M1 should sleep until a UDP datagram arrives, then
@@ -225,7 +231,7 @@ procedure records that version.
 | Decision | Why | Decided |
 |---|---|---|
 | Two releases (stock and fork), each tagged at the commit that built its binary — not one release with a binary added later | Each binary sits next to its exact source; satisfies the license's corresponding-source expectation (below) | 2026-10-22 |
-| The stock release is labelled a self-built image of Arduino's 0.6.0, not Arduino's binary | Build paths are compiled in, so the bytes differ from Arduino's (1,180,480 vs 1,180,064 for the app) | 2026-10-22 |
+| The stock release is labelled a self-built image of Arduino's 0.6.0, not Arduino's binary | Build paths are compiled in, so the bytes differ from Arduino's (app 1,179,856 bytes in the released build vs 1,180,064 in Arduino's) | 2026-10-22 |
 | Every released binary ships with a SHA256 | Identifies exactly which file was verified | 2026-10-22 |
 | Release assets: only the flash image, named `UNOR4-WIFI-S3-<version>-<variant>.bin`, plus `SHA256SUMS` | Follows Arduino's updater name for the same image; the separate build `.bin`s are never flashed in this flow | 2026-10-22 |
 | The fork is identifiable on the board, but keeps Arduino's major.minor | A separate number (e.g. 0.7) would collide with Arduino's own next release; the fork must always read as "based on Arduino X.Y" | 2026-10-22 (revised the same day) |

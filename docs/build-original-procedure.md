@@ -147,10 +147,11 @@ need it to follow this procedure.
 > > ### P.8 Go to the repository and the stock branch
 > >
 > > The stock firmware is built from the `feature/docs` branch: Arduino's
-> > code unchanged, plus these docs.
+> > code unchanged, plus these docs. This procedure keeps the repository
+> > in `~/git/unor4-wifi-interrupt-bridge` (`~` is your home folder).
 > >
 > > ```
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > git switch feature/docs
 > > git status
 > > ```
@@ -168,30 +169,21 @@ need it to follow this procedure.
 > > > Get the repository:
 > > >
 > > > ```
-> > > git clone https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge.git /home/tony/git/unor4-wifi-interrupt-bridge
+> > > git clone https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge.git ~/git/unor4-wifi-interrupt-bridge
 > > > ```
 > > >
 > > > **Then:** repeat P.8.
 > >
 > > > #### Fix P.8-B — the `feature/docs` branch does not exist
 > > >
-> > > Only the repository's maintainer should ever see this, and only
-> > > once: it means the branch has not been created yet. Create it from
-> > > `main` (Arduino's unchanged code):
+> > > Your copy of the repository is older than the branch. Fetch it:
 > > >
 > > > ```
-> > > git switch -c feature/docs main
+> > > git fetch origin
 > > > ```
 > > >
-> > > ✅ Prints `Switched to a new branch 'feature/docs'`.
-> > >
-> > > Then run P.8's `git status` again. It will also list `.gitignore`
-> > > and `docs/` under "Untracked files". That is expected until they
-> > > are committed to this branch (a ROADMAP.md Phase 1 item); P.8's ✅
-> > > only needs the `On branch feature/docs` line.
-> > >
-> > > Anyone else seeing this: the clone is out of date — run
-> > > `git fetch`, then repeat P.8.
+> > > If P.8 still fails after this, **stop**: the branch is missing on
+> > > GitHub too, and there is nothing to build.
 > > >
 > > > **Then:** repeat P.8.
 
@@ -249,7 +241,7 @@ need it to follow this procedure.
 > > ```
 > > cd hardware/esp32-patched/esp32/tools
 > > python3 ./get.py
-> > cd /home/tony/git/unor4-wifi-interrupt-bridge
+> > cd ~/git/unor4-wifi-interrupt-bridge
 > > ```
 > >
 > > It prints a `Downloading …` and `Extracting …` line for each of ten
@@ -378,8 +370,10 @@ need it to follow this procedure.
 > > ```
 > >
 > > - ✅ A number **no larger than `1638400`**. For the stock firmware it
-> >   is about `1180000` (`1180480` when this procedure was tested; a
-> >   difference of a few hundred bytes is normal).
+> >   is about `1180000`: `1179856` in `~/git/unor4-wifi-interrupt-bridge`
+> >   on 2026-10-22 (the build that was flashed and released), `1180480`
+> >   in another folder. The folder's path is compiled into the
+> >   firmware, so a difference of a few hundred bytes is normal.
 > > - ❌ Larger than `1638400` → **Fix 3.3** below. Do not continue.
 > >
 > > > #### Fix 3.3 — the firmware is larger than 1638400 bytes
