@@ -234,7 +234,7 @@ the board, reviewed release notes, release.
 | Revision | Version | Change | Status |
 |---|---|---|---|
 | `v0.6.0-interrupt.1` | 0.6.101 | Push mode, upstream pointer fix, fork marker | Released 2026-10-22 |
-| `v0.6.0-interrupt.2` | 0.6.102 | Security: TLS root certificates updated after the eMudhra CA key compromise (Mozilla 2026-10-20 + GlobalSign Root CA + Arduino's two); `examples/TLSCheck` and flash step 6 | Built (SHA256 `0f20d1ad…2412`, reproduced) and tested on the board 2026-10-22; release pending review |
+| `v0.6.0-interrupt.2` | 0.6.102 | Security: TLS root certificates updated after the eMudhra CA key compromise (Mozilla 2026-10-20 + GlobalSign Root CA + Arduino's two); `examples/TLSCheck` and flash step 6 | Released 2026-10-22 ([notes](releases/v0.6.0-interrupt.2.md); tag at `2f5f632`; the downloaded asset, SHA256 `0f20d1ad…2412`, is byte-for-byte the image tested on the board) |
 
 ## Maintenance model
 
