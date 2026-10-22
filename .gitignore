@@ -1,0 +1,14 @@
+# IDE
+.idea/
+
+# Build output and per-machine config (compile.sh, export.sh)
+/UNOR4USBBridge/build/
+/arduino-cli.yaml
+/x509_crt_bundle
+
+# Release packaging (package.sh)
+/[0-9]*.[0-9]*.[0-9]*/
+/unor4wifi-updater/unor4wifi-update-*
+
+# arduino-cli installer's default output folder
+/bin/
