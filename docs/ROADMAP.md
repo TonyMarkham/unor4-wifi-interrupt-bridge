@@ -23,7 +23,7 @@ flash path work, and the image to go back to if the fork misbehaves.
 | Phase | Deliverable | Status |
 |---|---|---|
 | 1 | Deterministic build-and-flash procedure for the stock firmware | ✅ done 2026-10-22 |
-| 2 | GitHub release of the stock firmware | ⚪ not started |
+| 2 | GitHub release of the stock firmware | ✅ done 2026-10-22 |
 | 3 | Interrupt (push-mode) support in the bridge | ⚪ not started |
 | 4 | Companion procedure for building and flashing the fork | ⚪ not started |
 | 5 | GitHub release of the fork | ⚪ not started |
@@ -67,19 +67,24 @@ flash path work, and the image to go back to if the fork misbehaves.
 
 > ## Phase 2 — Stock firmware release
 >
-> **Status:** ⚪ not started · **Needs:** Phase 1 done
+> **Status:** ✅ done 2026-10-22
 >
 > **Deliverable:** a GitHub release on this fork containing the stock
-> firmware exactly as built and flashed in Phase 1.
+> firmware exactly as built and flashed in Phase 1 —
+> [`v0.6.0-stock`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-stock).
 >
 > **Plan**
 >
-> - Tag: `v0.6.0-stock` (proposed), on `feature/docs`, at the commit
->   that contains the committed procedure.
+> - Tag: `v0.6.0-stock`, on `feature/docs`, at `5c498ec` (the commit
+>   that contains the committed procedure).
 > - Assets:
->   - the `S3-BOOT-APP.bin` that was flashed and verified in Phase 1,
->     under a descriptive name;
+>   - `UNOR4-WIFI-S3-0.6.0-stock.bin` — the `S3-BOOT-APP.bin` that was
+>     flashed and verified in Phase 1, renamed after Arduino's updater
+>     naming (`UNOR4-WIFI-S3-<version>.bin`);
 >   - a `SHA256SUMS` file for it.
+>   - The three separate build `.bin`s are **not** shipped: nothing in
+>     the procedure flashes them, and they invite the README's
+>     wrong-offset esptool command.
 > - Release notes say:
 >   - built from this tag with the procedure, and the toolchain versions
 >     used (platform 2.0.9, GCC 8.4.0, arduino-cli 1.5.1, esptool
@@ -92,13 +97,14 @@ flash path work, and the image to go back to if the fork misbehaves.
 >
 > **Done when**
 >
-> - [ ] The release text has been reviewed before publishing.
-> - [ ] The release is published, and the asset's SHA256 matches the
->       file flashed in Phase 1.
+> - [x] The release text has been reviewed before publishing.
+> - [x] The release is published, and the asset's SHA256 matches the
+>       file flashed in Phase 1 (`73f33387…e423`; the downloaded asset
+>       is byte-for-byte the flashed `S3-BOOT-APP.bin`).
 
 > ## Phase 3 — Interrupt support in the bridge
 >
-> **Status:** ⚪ not started · **Needs:** Phase 2 done
+> **Status:** ⚪ not started · **Needs:** Phase 2 done ✅
 >
 > **Deliverable:** the bridge with push mode (`AT+UDPPUSH`, `+UDPRX:`
 > frames), as designed in [bridge-fork.md](bridge-fork.md).
@@ -226,6 +232,7 @@ procedure records that version.
 | Two releases (stock and fork), each tagged at the commit that built its binary — not one release with a binary added later | Each binary sits next to its exact source; satisfies the license's corresponding-source expectation (below) | 2026-10-22 |
 | The stock release is labelled a self-built image of Arduino's 0.6.0, not Arduino's binary | Build paths are compiled in, so the bytes differ from Arduino's (1,180,480 vs 1,180,064 for the app) | 2026-10-22 |
 | Every released binary ships with a SHA256 | Identifies exactly which file was verified | 2026-10-22 |
+| Release assets: only the flash image, named `UNOR4-WIFI-S3-<version>-<variant>.bin`, plus `SHA256SUMS` | Follows Arduino's updater name for the same image; the separate build `.bin`s are never flashed in this flow | 2026-10-22 |
 | The fork is identifiable on the board, but keeps Arduino's major.minor | A separate number (e.g. 0.7) would collide with Arduino's own next release; the fork must always read as "based on Arduino X.Y" | 2026-10-22 (revised the same day) |
 | One stock + one fork release per Arduino release, tagged `vX.Y.Z-stock` and `vX.Y.Z-interrupt.N` | Keeps each pair tied to the Arduino version it is built from | 2026-10-22 (tag names proposed) |
 | Branches: `main` (pure Arduino mirror) → `feature/docs` (+ docs) → `feature/interrupt` (+ push mode); stock releases on `feature/docs`, fork releases on `feature/interrupt` | `main` stays syncable and PR-able; docs are always present when building; `git diff main feature/docs` proves stock is unmodified | 2026-10-22 |
@@ -243,7 +250,6 @@ the license headers, not legal advice.
 
 | Question | Settle by | Phase |
 |---|---|---|
-| Release asset file names | Decide when drafting the Phase 2 release | 2 |
 | Fork marker: high patch number, USB product-name suffix, or both | Check Arduino tools do not match on the product name; then decide | 3 |
 | Byte-for-byte reproducible builds (strip build paths with a compiler flag) — wanted? | It is a source change, so it belongs to the fork, not the stock release | 3 |
 | Does `WiFiS3` on the RA4M1 behave differently when the bridge reports a version newer than 0.6.0? | Read the `WiFiS3` library's version check before choosing the number | 3 |
