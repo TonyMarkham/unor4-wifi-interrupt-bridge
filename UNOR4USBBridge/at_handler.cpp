@@ -70,6 +70,26 @@ void CAtHandler::run() {
 /* -------------------------------------------------------------------------- */
   at_srv.run();
 
+  // push mode: forward one whole datagram per enabled UDP socket as an
+  // unsolicited "+UDPRX: <sock>,<len>|<data>\r\n" frame; it is sent by the
+  // next at_srv.run()
+  for(int i = 0; i < MAX_UDP_AVAILABLE; i++) {
+    if(udps[i] == nullptr || !udp_push[i]) {
+      continue;
+    }
+    int len = udps[i]->parsePacket();
+    if(len <= 0) {
+      continue;
+    }
+    std::vector<uint8_t> data(len);
+    int got = udps[i]->read(data.data(), len);
+    data.resize(got > 0 ? got : 0);
+    String header = "+UDPRX: " + String(i) + "," + String(data.size()) + "|";
+    at_srv.write_str(header.c_str());
+    at_srv.write_vec8(data);
+    at_srv.write_line_end();
+  }
+
   // execute all the pending tasks
 
   // it is intended for the tasks to add other tasks in queue after being executed,
@@ -102,6 +122,7 @@ CAtHandler::CAtHandler(HardwareSerial *s) : last_server_client_sock(0) {
 
   for(int i = 0; i < MAX_UDP_AVAILABLE; i++) {
     udps[i] = nullptr;
+    udp_push[i] = false;
   }
 
   for(int i = 0; i < MAX_CLIENT_AVAILABLE; i++) {

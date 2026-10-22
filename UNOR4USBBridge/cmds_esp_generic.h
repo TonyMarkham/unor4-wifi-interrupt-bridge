@@ -318,6 +318,7 @@ void CAtHandler::add_cmds_esp_generic() {
                   delete udps[i];
                   udps[i] = nullptr;
                }
+               udp_push[i] = false;
             }
 
             udps_num = 0;

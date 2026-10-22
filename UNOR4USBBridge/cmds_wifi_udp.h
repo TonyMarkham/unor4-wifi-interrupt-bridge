@@ -732,6 +732,7 @@ void CAtHandler::add_cmds_wifi_udp() {
                
                delete udps[sock];
                udps[sock] = nullptr;
+               udp_push[sock] = false;
                udps_num--;
                
             }
@@ -744,8 +745,41 @@ void CAtHandler::add_cmds_wifi_udp() {
       }
    };
 
-   
-   
+   /* ....................................................................... */
+   command_table[_UDPPUSH] = [this](auto & srv, auto & parser) {
+   /* ....................................................................... */
+      // AT+UDPPUSH=<sock>,<0|1>: when enabled, every datagram received on
+      // <sock> is sent unasked as a "+UDPRX:" frame (see CAtHandler::run)
+      switch (parser.cmd_mode) {
+         case chAT::CommandMode::Write: {
+            if (parser.args.size() != 2) {
+              return chAT::CommandStatus::ERROR;
+            }
+            auto &sock_num = parser.args[0];
+            auto &enable = parser.args[1];
+            if (sock_num.empty() || enable.empty()) {
+              return chAT::CommandStatus::ERROR;
+            }
+            int sock = atoi(sock_num.c_str());
+
+            if(sock < 0 || sock >= MAX_UDP_AVAILABLE || udps[sock] == nullptr) {
+               return chAT::CommandStatus::ERROR;
+            }
+
+            // drop a half-read datagram so parsePacket() can move on
+            udps[sock]->flush();
+            udp_push[sock] = atoi(enable.c_str()) != 0;
+            srv.write_response_prompt();
+            srv.write_line_end();
+            return chAT::CommandStatus::OK;
+         }
+         default:
+            return chAT::CommandStatus::ERROR;
+      }
+   };
+
+
+
 
    
 

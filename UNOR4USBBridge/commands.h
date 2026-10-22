@@ -104,6 +104,7 @@ enum file_op {
 #define _UDPREMOTEIP             "+UDPREMOTEIP"
 #define _UDPREMOTEPORT           "+UDPREMOTEPORT"
 #define _UDPSTOP                 "+UDPSTOP"
+#define _UDPPUSH                 "+UDPPUSH"
 
 #define _PING                    "+PING"
 

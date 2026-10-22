@@ -62,6 +62,7 @@ private:
    int last_server_client_sock;
 
    WiFiUDP    * udps[MAX_UDP_AVAILABLE];
+   bool udp_push[MAX_UDP_AVAILABLE];
    WiFiServer * serverWiFi[MAX_SERVER_AVAILABLE];
    WiFiClient * clients[MAX_CLIENT_AVAILABLE];
    CServerClient  serverClients[MAX_CLIENT_AVAILABLE];
