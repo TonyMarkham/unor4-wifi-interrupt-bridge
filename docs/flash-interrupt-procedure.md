@@ -48,6 +48,9 @@ separately: it found the port in download mode, and the chip check in
   - **Expected noise** — warnings you will see that are normal.
 - If a result matches neither the ✅ nor any ❌: **stop.** Do not
   improvise, especially in steps 2–4.
+- If you stop after step 2 has put the board in download mode, take it
+  out of download mode as the box at the top of step 2 says — it does
+  not leave on its own.
 - Step 3 (the backup) can be skipped in one situation; 3.1 tells you
   whether yours is it. Doing only steps 1–3 gives you a backup without
   flashing anything.
@@ -322,6 +325,23 @@ separately: it found the port in download mode, and the chip check in
 > unplugged, so you enter it once here and then do step 3 and step 4
 > without unplugging.
 >
+> > [!IMPORTANT]
+> > **Download mode lasts until the board loses power.** Only unplugging
+> > it takes the board out again; 4.2.1 does that at the end, and 3.5
+> > does it for a backup on its own. If you stop anywhere else — a ❌
+> > that says **stop**, or you decide not to go on — take it out
+> > yourself:
+> >
+> > 1. Unplug the board, wait five seconds, plug it back in.
+> > 2. Check with 1.1's command, `lsusb | grep -Ei ' (2341|303a):'`:
+> >    `2341:1002` means it runs its firmware again, unchanged;
+> >    `303a:1001` means it is still in download mode (the jumper from
+> >    2.2 is still on — remove it and repeat 1).
+> >
+> > This is safe at any point except while 3.3 or 4.1 is running. If
+> > 4.1 stopped part-way, follow Fix 4.1 instead: the firmware on the
+> > board is incomplete, and finishing the flash needs download mode.
+>
 > > ### 2.1 Enter download mode — method A (by command)
 > >
 > > **Board:** plugged in · **Jumper:** none
@@ -346,8 +366,9 @@ separately: it found the port in download mode, and the chip check in
 > > > sudo /tmp/unor4wifi-reboot/unor4wifi-reboot-linux64; echo "EXIT STATUS: $?"
 > > > ```
 > > >
-> > > - ✅ The only thing printed is `EXIT STATUS: 0`. Wait two seconds,
-> > >   then go to **2.3**.
+> > > - ✅ The only thing printed is `EXIT STATUS: 0`. The board is now in
+> > >   download mode and stays in it until it is unplugged. Wait two
+> > >   seconds, then go to **2.3**.
 > > > - ❌ Anything else → **Fix 2.1.2** below.
 > > >
 > > > > ##### Fix 2.1.2 — the reboot helper failed
