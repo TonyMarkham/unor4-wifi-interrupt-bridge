@@ -143,7 +143,8 @@ void setup() {
   USB.VID(0x2341);
   USB.PID(0x1002);
   USB.manufacturerName("Arduino");
-  USB.productName("UNO WiFi R4 CMSIS-DAP");
+  // interrupt fork; OpenOCD finds the debug adapter by "CMSIS-DAP" in this name
+  USB.productName("UNO WiFi R4 CMSIS-DAP (interrupt)");
   USB.firmwareVersion(U8TOBCD(FIRMWARE_MAJOR) << 8 | U8TOBCD(FIRMWARE_MINOR));
   //USB.enableDFU();
   DAP.begin();
