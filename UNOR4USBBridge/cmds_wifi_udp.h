@@ -55,6 +55,7 @@ void CAtHandler::add_cmds_wifi_udp() {
                         }
                         else {
                            delete udps[i];
+                           udps[i] = nullptr;
                            return chAT::CommandStatus::ERROR;
                         }
                      }
@@ -64,6 +65,7 @@ void CAtHandler::add_cmds_wifi_udp() {
                         }
                         else {
                            delete udps[i];
+                           udps[i] = nullptr;
                            return chAT::CommandStatus::ERROR;
                         }
                      }
@@ -127,6 +129,7 @@ void CAtHandler::add_cmds_wifi_udp() {
                      }
                      else {
                         delete udps[i];
+                        udps[i] = nullptr;
                         return chAT::CommandStatus::ERROR;
                      }
                     
