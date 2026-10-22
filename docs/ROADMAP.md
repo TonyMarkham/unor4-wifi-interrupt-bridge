@@ -225,6 +225,17 @@ flash path work, and the image to go back to if the fork misbehaves.
 >       file verified in Phase 4 (`603a3b84…00cb`; the downloaded asset
 >       is byte-for-byte the flashed image).
 
+## Fork revisions
+
+Each revision goes through the same steps as Phases 3–5: change,
+build-interrupt-procedure.md and flash-interrupt-procedure.md run on
+the board, reviewed release notes, release.
+
+| Revision | Version | Change | Status |
+|---|---|---|---|
+| `v0.6.0-interrupt.1` | 0.6.101 | Push mode, upstream pointer fix, fork marker | Released 2026-10-22 |
+| `v0.6.0-interrupt.2` | 0.6.102 | Security: TLS root certificates updated after the eMudhra CA key compromise (Mozilla 2026-10-20 + GlobalSign Root CA + Arduino's two); `examples/TLSCheck` and flash step 6 | Built (SHA256 `0f20d1ad…2412`, reproduced) and tested on the board 2026-10-22; release pending review |
+
 ## Maintenance model
 
 Each Arduino bridge release becomes **two releases of this fork**:
@@ -276,6 +287,7 @@ procedure records that version.
 | Release assets: only the flash image, named `UNOR4-WIFI-S3-<version>-<variant>.bin`, plus `SHA256SUMS` | Follows Arduino's updater name for the same image; the separate build `.bin`s are never flashed in this flow | 2026-10-22 |
 | Fork marker: patch number `100 + revision` (`0.6.101` for interrupt.1) **and** the USB product-name suffix `(interrupt)` | The patch is readable by a sketch (`AT+FWVERSION`) and over HID; the name shows in `lsusb -v` with no sketch at all. Limits: patch below 128 (WiFiS3 reads signed chars), version text within 11 characters, `CMSIS-DAP` kept in the name (OpenOCD matches it) | 2026-10-22 |
 | Fix upstream's dangling `udps[]` pointer (failed `AT+UDPBEGIN`) in the fork, as its own commit | The new `AT+UDPPUSH` would otherwise be one more way to use freed memory; stock releases stay unchanged | 2026-10-22 |
+| The fork's TLS root bundle = Mozilla's current list (curl `cacert.pem`, SHA256 verified) + GlobalSign Root CA + Arduino's two certificates | Removes both paths to eMudhra's compromised intermediates (emSign ECC Root CA - G3, AAA Certificate Services). ESP-IDF 4.4 only checks the issuer of the topmost certificate a server sends, so GlobalSign Root CA (retired by Mozilla for age) must stay or Google, Cloudflare and arduino.cc fail. Verified on the board with `examples/TLSCheck`. Stock keeps Arduino's bundle (branch rule) | 2026-10-22 |
 | The fork is identifiable on the board, but keeps Arduino's major.minor | A separate number (e.g. 0.7) would collide with Arduino's own next release; the fork must always read as "based on Arduino X.Y" | 2026-10-22 (revised the same day) |
 | One stock + one fork release per Arduino release, tagged `vX.Y.Z-stock` and `vX.Y.Z-interrupt.N` | Keeps each pair tied to the Arduino version it is built from | 2026-10-22 (tag names proposed) |
 | Branches: `main` (pure Arduino mirror) → `feature/docs` (+ docs) → `feature/interrupt` (+ push mode); stock releases on `feature/docs`, fork releases on `feature/interrupt` | `main` stays syncable and PR-able; docs are always present when building; `git diff main feature/docs` proves stock is unmodified | 2026-10-22 |

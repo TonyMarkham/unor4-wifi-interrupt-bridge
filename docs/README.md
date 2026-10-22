@@ -16,4 +16,4 @@ stock procedure once first, then
 | [build-original-reference.md](build-original-reference.md) | Optional. Only if you want to know *why* a step is the way it is. The procedure never requires it. |
 | [build-interrupt-procedure.md](build-interrupt-procedure.md) | Building the interrupt fork's image. Assumes the stock procedure was done. |
 | [flash-interrupt-procedure.md](flash-interrupt-procedure.md) | Flashing the interrupt fork and testing push mode with [`examples/UDPPushSleep`](../examples/UDPPushSleep/UDPPushSleep.ino); also how to go back to stock. |
-| [releases/](releases/) | The text of each GitHub release: [`v0.6.0-stock`](releases/v0.6.0-stock.md) and [`v0.6.0-interrupt.1`](releases/v0.6.0-interrupt.1.md). |
+| [releases/](releases/) | The text of each GitHub release: [`v0.6.0-stock`](releases/v0.6.0-stock.md), [`v0.6.0-interrupt.1`](releases/v0.6.0-interrupt.1.md) and [`v0.6.0-interrupt.2`](releases/v0.6.0-interrupt.2.md). |

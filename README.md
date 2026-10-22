@@ -4,14 +4,17 @@
 > **This is a fork: the interrupt bridge.** It adds an opt-in **UDP push
 > mode** to Arduino's bridge firmware 0.6.0: the bridge sends each
 > received datagram to the RA4M1 by itself, so a sketch can sleep until
-> a datagram arrives instead of polling. Everything else is Arduino's
-> code, unchanged.
+> a datagram arrives instead of polling. It also carries an up-to-date
+> set of TLS root certificates (Arduino's 0.6.0 still trusts the root
+> of eMudhra's compromised CA keys). Everything else is Arduino's code,
+> unchanged.
 >
-> - Releases: [`v0.6.0-interrupt.1`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-interrupt.1)
->   (push mode) and [`v0.6.0-stock`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-stock)
+> - Releases: [`v0.6.0-interrupt.2`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-interrupt.2)
+>   (latest: push mode, updated certificates) and [`v0.6.0-stock`](https://github.com/TonyMarkham/unor4-wifi-interrupt-bridge/releases/tag/v0.6.0-stock)
 >   (Arduino's 0.6.0, self-built, to go back to).
 > - How to build, flash and test either one: [docs/README.md](docs/README.md).
-> - Example sketch for the RA4M1: [examples/UDPPushSleep](examples/UDPPushSleep/UDPPushSleep.ino).
+> - Example sketches for the RA4M1: [examples/UDPPushSleep](examples/UDPPushSleep/UDPPushSleep.ino)
+>   (push mode) and [examples/TLSCheck](examples/TLSCheck/TLSCheck.ino) (the bridge's certificates).
 >
 > Everything below this box is Arduino's original README.
 

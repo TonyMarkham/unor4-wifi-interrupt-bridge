@@ -10,11 +10,11 @@ contains only what you do and what you should see.
 
 This procedure does not touch the board.
 
-**Revision 2 not yet followed as written.** The values below were
-measured on a build of revision 2 on 2026-10-22. Revision 1 (0.6.101)
-was followed as written the same day, starting from an empty
-`~/unor4wifi-images`, and its image matched an earlier build byte for
-byte.
+**Run on 2026-10-22.** Revision 2 (0.6.102) was followed as written,
+and its image matched an earlier build byte for byte (the SHA256
+quoted in 2.3). Revision 1 (0.6.101) was followed as written the same
+day, starting from an empty `~/unor4wifi-images`, with the same
+result.
 
 > [!IMPORTANT]
 > This procedure assumes you have already followed

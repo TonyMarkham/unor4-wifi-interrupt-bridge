@@ -27,13 +27,14 @@ should see.
 > Step 4 writes to the board. Do not start step 1 until step P has
 > passed every ✅ check.
 
-**Revision 2 not yet run on a board.** Steps 1–5 were followed end to
-end on a UNO R4 WiFi on 2026-10-22 with revision 1 (0.6.101); the ✅
-lines in 2.3, 4.2.2, 5.2, 5.4 and 5.5 quote what was seen then, with
-the version updated to 0.6.102. Step 6 (the TLS check) is new in
-revision 2; its ✅ is worked out from the sketch's source and the
-servers' certificate chains. If anything differs, **stop** — the doc
-is what needs fixing.
+**Run on a board on 2026-10-22.** Revision 2 (0.6.102) was followed
+end to end on a UNO R4 WiFi that ran revision 1, with the image
+build-interrupt-procedure.md produced (the same file, byte for byte,
+in two separate builds). Step 3 was skipped, as 3.1 allows. Step 5
+showed `+FWVERSION: 0.6.102` and datagrams arriving with `0` idle
+wake-ups, and step 6 gave `RESULT: all as expected`. The ✅ lines in
+2.3, 4.2.2, 5.2, 5.4, 5.5 and 6.4.2 quote what was seen in this run or
+the revision 1 run the same day.
 
 ## How to use this procedure
 
@@ -1000,8 +1001,8 @@ is what needs fixing.
 > > > #### 6.4.2 Restart the sketch
 > > >
 > > > Press the board's RESET button **once** (not a double-tap).
-> > > Within about a minute you see this (`<your network>` is your
-> > > network's name):
+> > > Within about a minute you see this (measured on 2026-10-22;
+> > > `<your network>` is your network's name):
 > > >
 > > > ```
 > > > === TLS check of the bridge's certificate bundle ===
