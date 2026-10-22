@@ -111,9 +111,10 @@ flash path work, and the image to go back to if the fork misbehaves.
 >
 > **Where it stands**
 >
-> - On `feature/interrupt`, four commits: the upstream fix for a
->   dangling socket pointer when `AT+UDPBEGIN` fails, push mode, the
->   fork marker, and the RA4M1 test sketch `tests/UDPPushTest`.
+> - On `feature/interrupt`: the upstream fix for a dangling socket
+>   pointer when `AT+UDPBEGIN` fails, push mode, the fork marker, and
+>   the RA4M1 example `examples/UDPPushSleep` (it replaced the first,
+>   always-awake test sketch `tests/UDPPushTest`).
 > - Fork marker, chosen: version `0.6.101` (patch = 100 + fork
 >   revision; must stay below 128 because WiFiS3 reads the version
 >   bytes as signed chars, and the version text within 11 characters)
@@ -159,9 +160,11 @@ flash path work, and the image to go back to if the fork misbehaves.
 >       firmware does not show it — `(interrupt)` in 4.2.2,
 >       `+FWVERSION: 0.6.101` in 5.4.2.
 > - [x] The feature check passes: a datagram reaches the RA4M1 with no
->       poll from its side — `+UDPRX: 0,5|hello\r\n` in 5.5, using the
->       test sketch instead of the Rust firmware of `bridge-fork.md`
->       Part 5.
+>       poll from its side — first `+UDPRX: 0,5|hello\r\n` with the test
+>       sketch, then with `examples/UDPPushSleep` (flash procedure 5.5):
+>       six datagrams, each woke the sleeping RA4M1, `0` idle wake-ups
+>       in between. Arduino C++ instead of the Rust firmware of
+>       `bridge-fork.md` Part 5.
 
 > ## Phase 4 — Companion procedure for the fork
 >
@@ -176,7 +179,7 @@ flash path work, and the image to go back to if the fork misbehaves.
 >   build the fork's image and save it to `~/unor4wifi-images/`.
 > - [flash-interrupt-procedure.md](flash-interrupt-procedure.md) —
 >   back up (optional when the board runs stock), flash, and test push
->   mode with `tests/UDPPushTest`; going back to stock from the
+>   mode with `examples/UDPPushSleep`; going back to stock from the
 >   `v0.6.0-stock` release.
 >
 > **Plan**

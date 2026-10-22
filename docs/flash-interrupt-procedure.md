@@ -1,10 +1,10 @@
 # UNO R4 WiFi interrupt bridge 0.6.101 — flash and test procedure
 
 This procedure flashes the **interrupt fork** of the bridge firmware to
-an Arduino UNO R4 WiFi, then proves push mode works with a test sketch:
-a UDP datagram sent from the PC reaches the board's RA4M1 without the
-RA4M1 asking for it. It contains only what you do and what you should
-see.
+an Arduino UNO R4 WiFi, then proves push mode works with the example
+sketch in `examples/UDPPushSleep`: the board's RA4M1 sleeps until a UDP
+datagram sent from the PC arrives, without ever asking for it. It
+contains only what you do and what you should see.
 
 > [!IMPORTANT]
 > This procedure assumes two things:
@@ -29,7 +29,9 @@ see.
 end on a UNO R4 WiFi running the stock firmware, with the image that
 build-interrupt-procedure.md produced (the same file, byte for byte,
 in two separate builds). Step 3 was skipped, as 3.1 allows. The ✅
-lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
+lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen. The port capture
+in 2.3 was added after that run and has not yet been used with a board
+in download mode.
 
 ## How to use this procedure
 
@@ -60,7 +62,7 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 >
 > > ### P.1 Go to the repository and the fork branch
 > >
-> > The test sketch lives on the `feature/interrupt` branch.
+> > The example sketch lives on the `feature/interrupt` branch.
 > >
 > > ```
 > > cd /home/tony/git/unor4-wifi-interrupt-bridge
@@ -122,7 +124,7 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 >
 > > ### P.4 Check the UNO R4 board support
 > >
-> > The test sketch runs on the board's other chip, the RA4M1, and needs
+> > The example sketch runs on the board's other chip, the RA4M1, and needs
 > > Arduino's UNO R4 board support to build.
 > >
 > > ```
@@ -163,10 +165,12 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > - ❌ Prints nothing → `sudo apt install netcat-openbsd`, then repeat
 > >   P.5.
 >
-> > ### P.6 Put your WiFi details into the test sketch
+> > ### P.6 Put your WiFi details into the example sketch
 > >
-> > The test sketch joins your WiFi network. Its credentials go in a
-> > file that git ignores, so they can never be committed.
+> > Step 5 tests the fork with the example sketch in
+> > `examples/UDPPushSleep`, which joins your WiFi network. Its
+> > credentials go in a file that git ignores, so they can never be
+> > committed.
 > >
 > > > [!IMPORTANT]
 > > > The board's WiFi only works on **2.4 GHz** networks. If your
@@ -175,8 +179,8 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > #### P.6.1 Create the file
 > > >
 > > > ```
-> > > cp tests/UDPPushTest/arduino_secrets.h.example tests/UDPPushTest/arduino_secrets.h
-> > > nano tests/UDPPushTest/arduino_secrets.h
+> > > cp examples/UDPPushSleep/arduino_secrets.h.example examples/UDPPushSleep/arduino_secrets.h
+> > > nano examples/UDPPushSleep/arduino_secrets.h
 > > > ```
 > > >
 > > > In the editor, replace `your-network-name` and
@@ -187,8 +191,8 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > #### P.6.2 Check the file
 > > >
 > > > ```
-> > > grep -c your-network tests/UDPPushTest/arduino_secrets.h
-> > > git status --short tests/
+> > > grep -c your-network examples/UDPPushSleep/arduino_secrets.h
+> > > git status --short examples/
 > > > ```
 > > >
 > > > - ✅ `grep` prints `0`, and `git status` prints nothing.
@@ -198,18 +202,17 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > >   git would commit your password. The `.gitignore` on this branch
 > > >   should prevent it; check P.1 says `On branch feature/interrupt`.
 >
-> > ### P.7 Build the test sketch
+> > ### P.7 Build the example sketch
 > >
 > > Building it now, before the board is involved, catches problems
 > > early.
 > >
 > > ```
-> > arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi tests/UDPPushTest
+> > arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi examples/UDPPushSleep
 > > ```
 > >
 > > - ✅ Ends with `Sketch uses … bytes` and `Global variables use …`
-> >   lines and no `Error` (`Sketch uses 59072 bytes` when this
-> >   procedure was written).
+> >   lines and no `Error` (`Sketch uses 61824 bytes` on 2026-10-22).
 > > - ❌ `arduino_secrets.h: No such file or directory` → P.6.1 was not
 > >   done. **Then:** do P.6, then repeat P.7.
 > > - ❌ Any other error → **stop** and look up the first `error:` line.
@@ -247,9 +250,18 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > pgrep -a serial-discovery
 > > ```
 >
-> All commands below use the serial port `/dev/ttyACM0`. Step 2.3
-> tells you the real one; if it differs, use yours everywhere
-> `/dev/ttyACM0` appears.
+> You never type the board's serial port yourself. Commands that talk
+> to the board use `"${PORT:?is not set}"`: the shell variable `PORT`,
+> set from the port the board actually has. 2.3 sets it in download
+> mode, and 5.2 sets it again when the board runs normally (the
+> port can change between the two). If `PORT` is not set, the command
+> does not run at all and the terminal prints
+> `bash: PORT: is not set` — never a guess at the port.
+>
+> > [!IMPORTANT]
+> > `PORT` exists only in the terminal window where it was set. Run
+> > every command from 2.3 to the end of step 4 in that same window. If
+> > you close it or switch to another one, repeat 2.3 there first.
 >
 > > ### 1.1 Check who owns the USB connector
 > >
@@ -394,24 +406,34 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > Remove the jumper. The board stays in download mode until it
 > > > is next unplugged. Go to **2.3**.
 >
-> > ### 2.3 Verify download mode and find the port
+> > ### 2.3 Verify download mode and capture the port
 > >
 > > **Board:** plugged in · **Jumper:** none
 > >
+> > Run all three lines. The second one finds the board's port in
+> > download mode and stores it in `$PORT`; the third shows it:
+> >
 > > ```
 > > lsusb -d 303a:1001
-> > ls -l /dev/serial/by-id/ | grep -i espressif
+> > PORT=$(readlink -f $(find /dev/serial/by-id/ -iname '*espressif*' 2>/dev/null) 2>/dev/null)
+> > echo "PORT is $PORT"
 > > ```
 > >
-> > - ✅ `lsusb` prints exactly one line, and the second command prints
-> >   one line ending in `-> ../../ttyACM0` (or another `ttyACM` number —
-> >   that is your port). Go to 3.1.
-> > - ❌ `lsusb` prints nothing → **Fix 2.3** below.
+> > - ✅ `lsusb` prints exactly one line, and the last line is
+> >   `PORT is /dev/ttyACM` followed by a number (for example
+> >   `PORT is /dev/ttyACM0`). Go to 3.1.
+> > - ❌ `lsusb` prints nothing, or the last line is just `PORT is`
+> >   with nothing after it → **Fix 2.3** below.
+> > - ❌ `PORT is` is followed by **two** ports, on two lines → another
+> >   ESP32 board is plugged in. Unplug it, then repeat 2.3.
 > >
 > > > #### Fix 2.3 — the board is not in download mode
 > > >
 > > > Re-run the 1.1 command (`lsusb | grep -Ei ' (2341|303a):'`):
 > > >
+> > > - `303a:1001` → the board *is* in download mode, but its serial
+> > >   port had not appeared yet when `PORT` was set. Wait five seconds
+> > >   and repeat 2.3 once. If `PORT is` is still empty, **stop**.
 > > > - `2341:006d` → go back to 1.1 and follow its ❌ for `2341:006d`.
 > > > - `2341:1002` → the board is running its firmware normally. If you
 > > >   came from 2.1, wait five seconds and repeat 2.3 once; if it still
@@ -464,19 +486,23 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > ### 3.2 Identify the chip
 > >
 > > ```
-> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 --after no_reset flash_id
+> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" --after no_reset flash_id
 > > ```
 > >
 > > - ✅ Among the output: `Chip is ESP32-S3 (revision v…)`, then
 > >   `Detected flash size: 8MB`, and finally `Staying in bootloader.`
 > > - ❌ `Detected flash size: 4MB` → use `0x400000` instead of
 > >   `0x800000` in 3.3 and `4194304` instead of `8388608` in 3.4.
-> > - ❌ `Failed to connect` or any `Error` → **Fix 3.2** below.
+> > - ❌ `bash: PORT: is not set`, `Failed to connect` or any `Error` →
+> >   **Fix 3.2** below.
 > >
 > > > #### Fix 3.2 — esptool could not talk to the board
 > > >
 > > > Nothing has been written; this only reads.
 > > >
+> > > - `bash: PORT: is not set` → this terminal window never ran 2.3.
+> > >   The board is still in download mode: repeat 2.3 in this window
+> > >   (no need to unplug), then repeat 3.2.
 > > > - `Permission denied` → P.3's `dialout` check was not passed.
 > > > - `Failed to connect` or `port is busy` → something else is
 > > >   using the port. Close the Arduino IDE and any serial monitor.
@@ -492,7 +518,7 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > >
 > > ```
 > > mkdir -p ~/unor4wifi-backups
-> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 --after no_reset read_flash 0 0x800000 ~/unor4wifi-backups/esp32s3-$(date +%Y%m%d-%H%M%S).bin
+> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" --after no_reset read_flash 0 0x800000 ~/unor4wifi-backups/esp32s3-$(date +%Y%m%d-%H%M%S).bin
 > > ```
 > >
 > > It takes about **15 minutes**. It shows a percentage while it runs.
@@ -567,7 +593,7 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > **Board:** plugged in — do not touch · **Jumper:** none
 > >
 > > ```
-> > espflash write-bin -b 115200 --port /dev/ttyACM0 0x0 ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin
+> > espflash write-bin -b 115200 --port "${PORT:?is not set}" 0x0 ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-interrupt.1.bin
 > > ```
 > >
 > > If it asks `Remember this serial port for future use? (y/n)`, press
@@ -592,6 +618,9 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > >
 > > > #### Fix 4.1 — the flash could not connect or stopped with an error
 > > >
+> > > - **`bash: PORT: is not set`** (nothing was run): this terminal
+> > >   window never ran 2.3. The board is still in download mode:
+> > >   repeat 2.3 in this window (no need to unplug), then repeat 4.1.
 > > > - **It could not connect** (nothing was written): close the
 > > >   Arduino IDE and any serial monitor, and stop ModemManager for
 > > >   this session (`sudo systemctl stop ModemManager`). Then unplug,
@@ -652,14 +681,16 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > >
 > > > > **Then:** repeat 4.2.2.
 
-> ## Step 5 — Test push mode
+> ## Step 5 — Test push mode: watch the RA4M1 sleep
 >
 > **Board:** plugged in · **Jumper:** none · **Run from:** repository root
 >
-> The test sketch goes onto the board's RA4M1. It joins your WiFi,
-> switches push mode on for UDP port 4210, and then only listens: it
-> prints everything the bridge sends, and never asks for anything. A
-> datagram that shows up in its output was pushed by the bridge.
+> The example sketch from P.7 goes onto the board's RA4M1. It joins
+> your WiFi, switches push mode on for UDP port 4210, and then
+> **sleeps** until a datagram arrives: the UART's interrupt wakes it, it
+> prints the datagram, and it goes back to sleep. With each datagram it
+> prints how many times it woke up *without* a datagram since the
+> previous one — the proof that it really slept.
 >
 > > [!CAUTION]
 > > This replaces the sketch on the RA4M1. If you want that sketch back
@@ -674,44 +705,58 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > - ❌ The LED does not fade → the taps were too slow; try again,
 > >   faster.
 >
-> > ### 5.2 Find the board's port
+> > ### 5.2 Capture the board's port
+> >
+> > The board now runs its firmware normally, so its port may differ
+> > from the one 2.3 found. Run both lines; the first finds the port
+> > and stores it in `PORT`, the second shows it:
 > >
 > > ```
-> > ls -l /dev/serial/by-id/
+> > PORT=$(readlink -f $(find /dev/serial/by-id/ -iname '*UNO_WiFi_R4_CMSIS-DAP*' 2>/dev/null) 2>/dev/null)
+> > echo "PORT is $PORT"
 > > ```
 > >
-> > ✅ One line containing `UNO_WiFi_R4_CMSIS-DAP__interrupt__`, ending
-> > in `-> ../../ttyACM0` (or another number — use that in 5.3 and
-> > 5.4). Measured on 2026-10-22, with the board's serial number shown
-> > as `…` (yours differs):
-> >
-> > ```
-> > usb-Arduino_UNO_WiFi_R4_CMSIS-DAP__interrupt__…-if01 -> ../../ttyACM0
-> > ```
+> > - ✅ The last line is `PORT is /dev/ttyACM` followed by a number
+> >   (`PORT is /dev/ttyACM0` on 2026-10-22). Do 5.3 straight away.
+> > - ❌ Just `PORT is` with nothing after it → the board's port was
+> >   not found. Run `ls -l /dev/serial/by-id/`: with the fork running
+> >   it lists one line like
+> >   `usb-Arduino_UNO_WiFi_R4_CMSIS-DAP__interrupt__…-if01 -> ../../ttyACM0`
+> >   (`…` is the board's serial number). If that line is missing, repeat
+> >   4.2.2. **Then:** repeat 5.2.
+> > - ❌ `PORT is` is followed by **two** ports, on two lines → another
+> >   UNO R4 WiFi is plugged in. Unplug it, then repeat from 5.1.
 >
-> > ### 5.3 Upload the test sketch
+> > ### 5.3 Upload the example
+> >
+> > In the same terminal window as 5.2:
 > >
 > > ```
-> > arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port /dev/ttyACM0 tests/UDPPushTest
+> > arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port "${PORT:?is not set}" examples/UDPPushSleep
 > > ```
 > >
 > > - ✅ It finishes without `Error`.
+> > - ❌ `bash: PORT: is not set` → this terminal window never ran 5.2.
+> >   **Then:** repeat from 5.1 in this window.
 > > - ❌ It fails → repeat from 5.1 (double-tap) once. If it fails
 > >   again, **stop** — uploads go through the bridge, so the fork may
 > >   be broken. Go back to stock with **Going back to stock** at the
 > >   end of this document.
 >
-> > ### 5.4 Watch the sketch's output
+> > ### 5.4 Watch it start
 > >
 > > > #### 5.4.1 Open the serial monitor
 > > >
+> > > In the same terminal window as 5.2 and 5.3:
+> > >
 > > > ```
-> > > arduino-cli monitor -p /dev/ttyACM0 --config 115200
+> > > arduino-cli monitor -p "${PORT:?is not set}" --config 115200
 > > > ```
 > > >
 > > > ✅ It lists its port settings (`baudrate=115200` and five more
-> > > lines), then prints
-> > > `Connecting to /dev/ttyACM0. Press CTRL-C to exit.` and waits.
+> > > lines), then prints `Connecting to`, the port from 5.2, and
+> > > `. Press CTRL-C to exit.` (measured:
+> > > `Connecting to /dev/ttyACM0. Press CTRL-C to exit.`), and waits.
 > > > Leave this terminal open for the rest of step 5.
 > >
 > > > #### 5.4.2 Restart the sketch
@@ -720,34 +765,35 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > restarts the sketch so you see its output from the beginning; the
 > > > monitor stays connected.
 > > >
-> > > Within about 15 seconds you see this. Where it shows
-> > > `<your network>` and `<board-ip>`, yours shows your network's
-> > > name and the board's real IP address (four numbers with dots).
-> > > The `\r\n` marks are printed by the sketch on purpose — they show
-> > > the exact bytes the bridge sent:
+> > > Within about 15 seconds you see this (measured on 2026-10-22).
+> > > Where it shows `<your network>` and `<board-ip>`, yours shows your
+> > > network's name and the board's real IP address (four numbers with
+> > > dots):
 > > >
 > > > ```
-> > > === UDP push-mode test ===
+> > > === UDP push mode, sleeping RA4M1 ===
 > > > Joining WiFi <your network>
 > > > Joined. Board IP: <board-ip>
 > > > > AT+FWVERSION?
-> > > < +FWVERSION: 0.6.101\r\n
-> > > OK\r\n
+> > > < +FWVERSION: 0.6.101
+> > > OK
 > > > > AT+UDPBEGIN=4210
-> > > < +UDPBEGIN: 0\r\n
-> > > OK\r\n
+> > > < +UDPBEGIN: 0
+> > > OK
 > > > > AT+UDPPUSH=0,1
-> > > < +UDPPUSH: \r\n
-> > > OK\r\n
+> > > < +UDPPUSH:
+> > > OK
 > > >
 > > > Push mode is ON for socket 0. Send a datagram from the PC:
 > > >   echo -n hello | nc -u -w1 <board-ip> 4210
-> > > Everything below arrived unasked:
+> > > Stopping the 1 ms timer; sleeping until a datagram arrives.
 > > > ```
 > > >
-> > > - ✅ It ends with `Everything below arrived unasked:`. The line
-> > >   above it, `echo -n hello | nc -u -w1 …`, is the exact command
-> > >   for 5.5, with your board's IP address already filled in.
+> > > - ✅ It ends with
+> > >   `Stopping the 1 ms timer; sleeping until a datagram arrives.`
+> > >   From here on, the RA4M1 is asleep. The line above it,
+> > >   `echo -n hello | nc -u -w1 …`, is the exact command for 5.5,
+> > >   with your board's IP address already filled in.
 > > > - ❌ `not joined yet, retrying in 5 s` keeps repeating → the board
 > > >   cannot join your WiFi. **Fix 5.4.2-A** below.
 > > > - ❌ `STOPPED: AT+UDPPUSH was refused` → the bridge has no push
@@ -759,7 +805,7 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > > ##### Fix 5.4.2-A — the board cannot join WiFi
 > > > >
 > > > > Press **Ctrl+C** to close the monitor. Check the name and
-> > > > password in `tests/UDPPushTest/arduino_secrets.h` (P.6.1's
+> > > > password in `examples/UDPPushSleep/arduino_secrets.h` (P.6.1's
 > > > > `nano` line), and that the network is 2.4 GHz.
 > > > >
 > > > > **Then:** repeat from P.7 (build), then 5.1 to 5.4.
@@ -767,17 +813,18 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > > ##### Fix 5.4.2-B — the monitor shows nothing
 > > > >
 > > > > Press RESET once more. If there is still nothing, press
-> > > > **Ctrl+C**, check the port with 5.2, and repeat 5.4 with the
-> > > > port it shows.
+> > > > **Ctrl+C**, repeat 5.2 (it captures the port again), then
+> > > > repeat 5.4.
 > > > >
 > > > > **Then:** repeat 5.4.2.
 >
-> > ### 5.5 Send a datagram from the PC
+> > ### 5.5 Wake it with datagrams
 > >
 > > Open a **second** terminal. Copy the `echo -n hello | nc -u -w1 …`
 > > line **from the monitor** (the sketch printed it in 5.4.2, with your
 > > board's IP address in it), paste it into the second terminal, and
-> > press Enter.
+> > press Enter. Wait about 10 seconds and run it again; then wait about
+> > a minute and run it a third time.
 > >
 > > > [!IMPORTANT]
 > > > Use the line from the monitor, not one from this document. The
@@ -785,14 +832,21 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 > > > is wrong, `nc` still prints nothing and returns to the prompt, so
 > > > nothing tells you it went to the wrong place.
 > >
-> > Then look at the monitor in the first terminal.
+> > - ✅ Each run adds one line to the monitor:
 > >
-> > - ✅ A new line appears under `Everything below arrived unasked:`:
-> >   `+UDPRX: 0,5|hello\r\n` (measured on 2026-10-22). That is the
-> >   datagram, pushed by the bridge: socket `0`, `5` bytes, then the
-> >   bytes themselves. Run the `nc` line again — each run adds one
-> >   more identical line.
-> > - ❌ Nothing appears → **Fix 5.5** below.
+> >   ```
+> >   datagram on socket 0, 5 bytes: hello   [idle wake-ups since the previous datagram: 0]
+> >   ```
+> >
+> >   The number in brackets is how often the RA4M1 woke up with
+> >   nothing to read. It stays at `0` whether you waited 10 seconds or
+> >   a minute — it slept the whole time in between. On 2026-10-22, six
+> >   datagrams sent at different intervals all showed `0`.
+> > - ❌ No line appears → **Fix 5.5** below.
+> > - ❌ The number is large (hundreds or more) and grows the longer
+> >   you wait → something other than the UART keeps waking the RA4M1.
+> >   Push mode still works; the sleep does not. **Stop** and report the
+> >   three numbers.
 > >
 > > > #### Fix 5.5 — the datagram does not arrive
 > > >
@@ -817,10 +871,12 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 >
 > - the USB check (4.2): the bridge starts and shows `(interrupt)`;
 > - a sketch upload through the bridge (5.3);
-> - a WiFi join and AT commands from the RA4M1 (5.4);
-> - push mode: a datagram reached the RA4M1 unasked (5.5).
+> - a WiFi join and AT commands from the RA4M1, including
+>   `+FWVERSION: 0.6.101` (5.4);
+> - push mode: each datagram reached the RA4M1 unasked, and the RA4M1
+>   slept until it arrived (5.5).
 >
-> The test sketch stays on the RA4M1 until you upload another sketch.
+> The example sketch stays on the RA4M1 until you upload another one.
 > If you made a backup in step 3, it is the newest file in
 > `~/unor4wifi-backups/`.
 
@@ -861,8 +917,10 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 >
 > > #### S.1.3 Flash it
 > >
+> > In the same terminal window as S.1.2's 2.3:
+> >
 > > ```
-> > espflash write-bin -b 115200 --port /dev/ttyACM0 0x0 ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-stock.bin
+> > espflash write-bin -b 115200 --port "${PORT:?is not set}" 0x0 ~/unor4wifi-images/UNOR4-WIFI-S3-0.6.0-stock.bin
 > > ```
 > >
 > > ✅ The progress bar fills to the end and the command returns to the
@@ -895,10 +953,11 @@ lines in 4.2.2, 5.2, 5.4 and 5.5 quote what was seen.
 >
 > > #### S.2.3 Write it back
 > >
-> > Replace `<file-name>` with the name from S.2.2:
+> > In the same terminal window as S.2.1's 2.3. Replace `<file-name>`
+> > with the name from S.2.2:
 > >
 > > ```
-> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port /dev/ttyACM0 write_flash 0x0 ~/unor4wifi-backups/<file-name>
+> > python3 hardware/esp32-patched/esp32/tools/esptool/esptool.py --chip esp32s3 --port "${PORT:?is not set}" write_flash 0x0 ~/unor4wifi-backups/<file-name>
 > > ```
 > >
 > > ✅ It prints `Hash of data verified.` and then `Leaving...`.
